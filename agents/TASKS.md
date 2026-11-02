@@ -5,14 +5,15 @@ If Claude has stopped (no Claude commit for 2+ hours), Codex may take `claude` t
 
 | id | owner | status | task |
 |---|---|---|---|
-| spec | claude | done | `spec/layout.json` + tests (27 keys, 8 letters on long-press) |
-| freq | claude | doing | Letter/word frequency from a Mongolian corpus → `spec/letterfreq.json`, then confirm the layout |
-| web | codex | open | Web keyboard + landing/download page in `web/` |
-| ios | codex | open | iOS keyboard extension (XcodeGen) + GitHub Actions simulator build in `ios/`, `.github/workflows/ios.yml` |
-| copy | grok | open | Launch tweets + page text in Mongolian → `launch/` |
-| layout-review | grok | open | Review the long-press placement from a Mongolian typist's view → `agents/out/layout-review.md` |
-| android | claude | doing | Android IME app in `android/` |
-| build | claude | open | Android SDK + release build on titem, signing |
-| android-review | codex | blocked (android) | Independent review of `android/`: touch handling, long-press, key sizes, IME edge cases |
-| deploy | claude | open | trustchain.mn/keyboard route in argo-sites, APK hosting, company page link |
-| translit | codex | later | Optional Latin→Cyrillic toggle, off by default (only after everything else) |
+| spec | claude | done | `spec/layout.json` + tests (27 keys, 8 letters on long-press; ю also under у) |
+| freq | claude | done | Leipzig mon_news_2020 (8.1M letters): the 8 hidden letters are exactly the 8 rarest, all < 0.4% |
+| web | claude | done | `web/`, live at trustchain.mn/keyboard (Codex was blocked: no bubblewrap in WSL) |
+| android | claude | done | Android 1.0.1, signed, no permissions, live APK |
+| build | claude | done | titem: JDK 17 / SDK 35 / Gradle 8.11.1 in ~/opt and ~/android-sdk; checkout ~/build; key ~/keys + ~/.config/tk-signing.properties |
+| deploy | claude | done | argo-sites `/keyboard` route; company page row #54 |
+| copy | grok | review | `launch/tweets.md` drafts (need a native-speaker edit; see the note at the top). page-copy.json and install-guide.md were not produced |
+| layout-review | grok | done | `agents/out/layout-review.md`; adopted ю under у; the rest is contradicted by the frequency data |
+| ios | claude | review | `ios/` + `.github/workflows/ios.yml` written, **not compiled yet**: waits for the GitHub repo (CI runs on macOS) |
+| testflight | user | blocked | GitHub repo + secrets ASC_KEY_ID, ASC_ISSUER_ID, APPLE_TEAM_ID, ASC_KEY_P8 (Admin key), App ID + app record |
+| android-review | codex | open (needs bubblewrap) | Independent review of `android/` and `ios/` Swift for bugs (touch handling, long-press, IME edge cases) |
+| translit | codex | later | Optional Latin→Cyrillic toggle, off by default |
