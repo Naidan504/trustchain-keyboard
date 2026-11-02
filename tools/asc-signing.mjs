@@ -1,7 +1,9 @@
-// CI signing without devices or a Mac keychain from before: uses the App Store Connect API to
-//   setup <csr.pem> <outDir>  ensure bundle IDs, create a temporary Apple Distribution certificate from the CSR,
-//                             create App Store profiles for app + extension; writes dist.cer, *.mobileprovision, signing.env
-//   cleanup <outDir>          revoke the temporary certificate and delete the profiles
+// CI signing without devices, via the App Store Connect API.
+//   create-cert <csr.pem> <outDir>   ONE-TIME: create the long-lived Apple Distribution certificate from a CSR;
+//                                    writes dist.cer and cert-id.txt. Never revoke it: TestFlight builds signed
+//                                    with a revoked certificate stop installing and their extensions are rejected.
+//   profiles <certId> <outDir>       every build: ensure bundle IDs, reuse (or create) App Store profiles for
+//                                    app + extension bound to that certificate; writes *.mobileprovision
 // Env: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8. Prints no secrets.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -36,46 +38,40 @@ async function api(method, p, body) {
 
 const [cmd, a1, a2] = process.argv.slice(2);
 
-if (cmd === 'setup') {
+if (cmd === 'create-cert') {
   const csr = fs.readFileSync(a1, 'utf8').replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
-  const out = a2;
+  fs.mkdirSync(a2, { recursive: true });
+  const cert = (await api('POST', '/v1/certificates', { data: { type: 'certificates', attributes: { certificateType: 'DISTRIBUTION', csrContent: csr } } })).data;
+  fs.writeFileSync(path.join(a2, 'dist.cer'), Buffer.from(cert.attributes.certificateContent, 'base64'));
+  fs.writeFileSync(path.join(a2, 'cert-id.txt'), cert.id);
+  console.log(`created distribution certificate, expires ${cert.attributes.expirationDate}`);
+} else if (cmd === 'profiles') {
+  const certId = a1, out = a2;
   fs.mkdirSync(out, { recursive: true });
-
-  // 1. Bundle IDs (the extension's is created on first run).
   for (const t of TARGETS) {
     const found = (await api('GET', `/v1/bundleIds?filter[identifier]=${t.id}&limit=5`)).data.find(b => b.attributes.identifier === t.id);
-    t.bundle = found ?? (await api('POST', '/v1/bundleIds', { data: { type: 'bundleIds', attributes: { identifier: t.id, name: t.name, platform: 'IOS' } } })).data;
-    console.log(`bundle id ${t.id}: ${found ? 'exists' : 'created'}`);
-  }
-
-  // 2. Temporary distribution certificate.
-  const cert = (await api('POST', '/v1/certificates', { data: { type: 'certificates', attributes: { certificateType: 'DISTRIBUTION', csrContent: csr } } })).data;
-  fs.writeFileSync(path.join(out, 'dist.cer'), Buffer.from(cert.attributes.certificateContent, 'base64'));
-  console.log(`created temporary distribution certificate (expires ${cert.attributes.expirationDate})`);
-
-  // 3. Fresh App Store profiles bound to that certificate (old CI profiles with the same name are removed).
-  const env = [`ASC_CERT_ID=${cert.id}`];
-  for (const t of TARGETS) {
-    const old = (await api('GET', `/v1/profiles?filter[name]=${encodeURIComponent(t.profile)}&limit=10`)).data;
-    for (const p of old) await api('DELETE', `/v1/profiles/${p.id}`);
-    const prof = (await api('POST', '/v1/profiles', { data: {
-      type: 'profiles',
-      attributes: { name: t.profile, profileType: 'IOS_APP_STORE' },
-      relationships: {
-        bundleId: { data: { type: 'bundleIds', id: t.bundle.id } },
-        certificates: { data: [{ type: 'certificates', id: cert.id }] },
-      },
-    } })).data;
+    const bundle = found ?? (await api('POST', '/v1/bundleIds', { data: { type: 'bundleIds', attributes: { identifier: t.id, name: t.name, platform: 'IOS' } } })).data;
+    // Reuse an active profile with this name that already contains the certificate; otherwise replace it.
+    let prof;
+    for (const p of (await api('GET', `/v1/profiles?filter[name]=${encodeURIComponent(t.profile)}&limit=10`)).data) {
+      const certs = (await api('GET', `/v1/profiles/${p.id}/certificates?limit=20`)).data.map(c => c.id);
+      if (!prof && p.attributes.profileState === 'ACTIVE' && certs.includes(certId)) prof = p;
+      else await api('DELETE', `/v1/profiles/${p.id}`);
+    }
+    if (!prof) {
+      prof = (await api('POST', '/v1/profiles', { data: {
+        type: 'profiles',
+        attributes: { name: t.profile, profileType: 'IOS_APP_STORE' },
+        relationships: {
+          bundleId: { data: { type: 'bundleIds', id: bundle.id } },
+          certificates: { data: [{ type: 'certificates', id: certId }] },
+        },
+      } })).data;
+      console.log(`profile "${t.profile}": created`);
+    } else console.log(`profile "${t.profile}": reused`);
     fs.writeFileSync(path.join(out, `${prof.attributes.uuid}.mobileprovision`), Buffer.from(prof.attributes.profileContent, 'base64'));
-    env.push(`ASC_PROFILE_${t.id === TARGETS[0].id ? 'APP' : 'EXT'}=${prof.id}`);
-    console.log(`profile "${t.profile}" ready`);
   }
-  fs.writeFileSync(path.join(out, 'signing.env'), env.join('\n') + '\n');
-} else if (cmd === 'cleanup') {
-  const env = Object.fromEntries(fs.readFileSync(path.join(a1, 'signing.env'), 'utf8').trim().split('\n').map(l => l.split('=')));
-  for (const k of ['ASC_PROFILE_APP', 'ASC_PROFILE_EXT']) if (env[k]) await api('DELETE', `/v1/profiles/${env[k]}`).catch(e => console.log(e.message));
-  if (env.ASC_CERT_ID) await api('DELETE', `/v1/certificates/${env.ASC_CERT_ID}`).then(() => console.log('revoked temporary certificate'), e => console.log(e.message));
 } else {
-  console.error('usage: asc-signing.mjs setup <csr.pem> <outDir> | cleanup <outDir>');
+  console.error('usage: asc-signing.mjs create-cert <csr.pem> <outDir> | profiles <certId> <outDir>');
   process.exit(2);
 }

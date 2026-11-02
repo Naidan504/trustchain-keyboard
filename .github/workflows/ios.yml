@@ -86,30 +86,31 @@ jobs:
         run: |
           test -n "$ASC_KEY_ID" -a -n "$ASC_ISSUER_ID" -a -n "$APPLE_TEAM_ID" -a -n "$ASC_KEY_P8" || { echo "Missing secrets"; exit 1; }
           mkdir -p ~/private_keys && printf '%s\n' "$ASC_KEY_P8" > ~/private_keys/AuthKey_$ASC_KEY_ID.p8
-      - name: Temporary distribution certificate + App Store profiles
+      - name: Distribution certificate (from secrets) + App Store profiles
+        env:
+          DIST_P12_BASE64: ${{ secrets.DIST_P12_BASE64 }}
+          DIST_P12_PASSWORD: ${{ secrets.DIST_P12_PASSWORD }}
+          DIST_CERT_ID: ${{ secrets.DIST_CERT_ID }}
         run: |
           set -euo pipefail
+          test -n "$DIST_P12_BASE64" -a -n "$DIST_CERT_ID" || { echo "Run the 'Create distribution certificate' workflow and store its secrets first"; exit 1; }
           S=$RUNNER_TEMP/sign; mkdir -p $S; cd $S
-          /usr/bin/openssl genrsa -out dist.key 2048 2>/dev/null
-          /usr/bin/openssl req -new -key dist.key -out dist.csr -subj "/CN=TrustChain Keyboard CI/O=Trustchain Tuul LLC/C=MN"
-          node $GITHUB_WORKSPACE/tools/asc-signing.mjs setup dist.csr .
-          /usr/bin/openssl x509 -inform DER -in dist.cer -out dist.pem
-          P=$(/usr/bin/openssl rand -hex 16)
-          /usr/bin/openssl pkcs12 -export -inkey dist.key -in dist.pem -out dist.p12 -passout pass:$P
+          printf '%s' "$DIST_P12_BASE64" | base64 --decode > dist.p12
+          node $GITHUB_WORKSPACE/tools/asc-signing.mjs profiles "$DIST_CERT_ID" .
           KC=$RUNNER_TEMP/ci.keychain-db; KP=$(/usr/bin/openssl rand -hex 16)
           security create-keychain -p "$KP" "$KC"
           security set-keychain-settings -lut 21600 "$KC"
           security unlock-keychain -p "$KP" "$KC"
           curl -fsSL -o wwdr.cer https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
           security import wwdr.cer -k "$KC" -T /usr/bin/codesign || true
-          security import dist.p12 -k "$KC" -P "$P" -T /usr/bin/codesign -T /usr/bin/security
+          security import dist.p12 -k "$KC" -P "$DIST_P12_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KP" "$KC" > /dev/null
           security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
           security find-identity -v -p codesigning "$KC" | sed 's/[0-9A-F]\{40\}/<sha1>/'
           for d in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
             mkdir -p "$d" && cp ./*.mobileprovision "$d/"
           done
-          rm -f dist.key dist.p12
+          rm -f dist.p12
       - name: Archive
         working-directory: ios
         run: |
@@ -144,9 +145,8 @@ jobs:
             -exportOptionsPlist build/ExportOptions.plist -exportPath build/export \
             -authenticationKeyPath ~/private_keys/AuthKey_$ASC_KEY_ID.p8 \
             -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -n 60
-      - name: Clean up (revoke temporary certificate, delete keychain and key file)
+      - name: Clean up (keychain and key file; the certificate is kept on purpose)
         if: always()
         run: |
-          [ -f $RUNNER_TEMP/sign/signing.env ] && node tools/asc-signing.mjs cleanup $RUNNER_TEMP/sign || true
           security delete-keychain $RUNNER_TEMP/ci.keychain-db 2>/dev/null || true
           rm -rf ~/private_keys $RUNNER_TEMP/sign
