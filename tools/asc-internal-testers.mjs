@@ -40,7 +40,8 @@ console.log(`app: ${app.attributes.name} (${app.id})`);
 // Wait (up to 45 min) for the newest build to finish processing.
 let build;
 for (let i = 0; i < 90; i++) {
-  build = (await api('GET', `/v1/builds?filter[app]=${app.id}&sort=-uploadedDate&limit=1`)).data[0];
+  // BUILD (env) = the CFBundleVersion to wait for; otherwise the newest upload.
+  build = (await api('GET', `/v1/builds?filter[app]=${app.id}${process.env.BUILD ? `&filter[version]=${process.env.BUILD}` : ''}&sort=-uploadedDate&limit=1`)).data[0];
   const state = build?.attributes.processingState;
   console.log(`build ${build?.attributes.version ?? '-'}: ${state ?? 'not uploaded yet'}`);
   if (state === 'VALID') break;

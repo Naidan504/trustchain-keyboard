@@ -2,6 +2,10 @@ name: TestFlight testers
 
 on:
   workflow_dispatch:
+    inputs:
+      build:
+        description: Build number to wait for (blank = newest upload)
+        required: false
 
 jobs:
   internal:
@@ -18,3 +22,4 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          BUILD: ${{ inputs.build }}
