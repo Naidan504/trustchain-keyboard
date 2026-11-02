@@ -65,3 +65,23 @@ targets:
             PrefersRightToLeft: false
             PrimaryLanguage: mn
             RequestsOpenAccess: false
+  UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: TrustChainKeyboard
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.keyboard.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: TrustChainKeyboard
+schemes:
+  TrustChainKeyboard:
+    build:
+      targets:
+        TrustChainKeyboard: all
+    test:
+      targets:
+        - UITests

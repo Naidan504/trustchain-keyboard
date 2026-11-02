@@ -49,6 +49,10 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         isMultipleTouchEnabled = true
         contentMode = .redraw
         backgroundColor = .clear
+        // Lets UI tests find the keyboard (keys are drawn, not separate views).
+        isAccessibilityElement = true
+        accessibilityIdentifier = "trustchain-keyboard"
+        accessibilityLabel = "TrustChain Keyboard"
     }
 
     required init?(coder: NSCoder) { fatalError("not used") }

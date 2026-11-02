@@ -32,6 +32,7 @@ final class SetupViewController: UIViewController {
         test.layer.borderColor = UIColor.separator.cgColor
         test.heightAnchor.constraint(equalToConstant: 110).isActive = true
         test.accessibilityLabel = "Энд бичиж туршаарай"
+        test.accessibilityIdentifier = "test-field"
 
         let privacy = label("Нууцлал: энэ гар «Full Access» шаарддаггүй, интернэт ашигладаггүй. Таны бичсэн зүйл утаснаас гарахгүй, хадгалагдахгүй.", size: 14, color: .secondaryLabel)
         let footer = label("© Трастчейн Туул ХХК · trustchain.mn", size: 13, color: .secondaryLabel)

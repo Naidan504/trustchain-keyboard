@@ -58,6 +58,42 @@ jobs:
           path: ios/setup-screen.png
           if-no-files-found: ignore
 
+  ui-test:
+    name: UI test in the simulator (Settings lists the keyboard, typing works)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the newest Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          sudo xcode-select -s "$X"; xcodebuild -version
+      - run: brew install xcodegen
+      - run: node tools/sync-spec.mjs
+      - working-directory: ios
+        run: xcodegen
+      - name: Run UI test
+        working-directory: ios
+        run: |
+          set -o pipefail
+          DEV=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone 1[5-7][^(]*\(([0-9A-F-]{36})\)' | grep -oE '[0-9A-F-]{36}')
+          echo "simulator $DEV"
+          xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
+            -destination "id=$DEV" -resultBundlePath build/ui.xcresult \
+            CODE_SIGNING_ALLOWED=NO | tail -n 60
+      - name: Export screenshots
+        if: always()
+        working-directory: ios
+        run: |
+          mkdir -p build/shots
+          xcrun xcresulttool export attachments --path build/ui.xcresult --output-path build/shots || true
+          ls build/shots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-test-screens
+          path: ios/build/shots
+          if-no-files-found: ignore
+
   testflight:
     name: Upload to TestFlight
     needs: build
