@@ -78,7 +78,8 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath ~/private_keys/AuthKey_$ASC_KEY_ID.p8 \
             -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CURRENT_PROJECT_VERSION=${{ github.run_number }} | tail -n 80
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY="Apple Distribution" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} | tail -n 80
       - name: Export and upload to App Store Connect
         working-directory: ios
         run: |
