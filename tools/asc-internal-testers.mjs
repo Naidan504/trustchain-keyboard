@@ -84,4 +84,19 @@ for (let i = 0; i < users.length; i++) {
     console.log(`${masked} already a tester; ensured in group`);
   }
 }
-console.log('done: open the TestFlight app on your iPhone (signed in with that Apple ID) to install.');
+// (Re)send the TestFlight email invitation to every tester in the group, so they can accept it on the phone.
+const testers = (await api('GET', `/v1/betaGroups/${group.id}/betaTesters?limit=50`)).data;
+for (const t of testers) {
+  const masked = String(t.attributes.email).replace(/^(.).*(@.*)$/, '$1***$2');
+  console.log(`tester ${masked}: state ${t.attributes.state ?? '-'}, invite ${t.attributes.inviteType ?? '-'}`);
+  try {
+    await api('POST', '/v1/betaTesterInvitations', { data: {
+      type: 'betaTesterInvitations',
+      relationships: { app: { data: { type: 'apps', id: app.id } }, betaTester: { data: { type: 'betaTesters', id: t.id } } },
+    } });
+    console.log(`  invitation email sent to ${masked}`);
+  } catch (e) { console.log(`  invitation: ${e.message}`); }
+}
+const groupBuilds = (await api('GET', `/v1/betaGroups/${group.id}/builds?limit=5`)).data;
+console.log(`builds visible to the group: ${groupBuilds.map(b => b.attributes.version).join(', ') || 'none (hasAccessToAllBuilds should cover it)'}`);
+console.log('done: open the TestFlight email on your iPhone and tap "View in TestFlight".');
