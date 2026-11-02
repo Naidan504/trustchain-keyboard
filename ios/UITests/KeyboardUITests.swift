@@ -24,7 +24,12 @@ final class KeyboardUITests: XCTestCase {
         // Several elements can match (e.g. the page title "Keyboards" and the row "Keyboards  2"):
         // take the lowest hittable one on screen, which is the row, not the navigation title.
         let query = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR label BEGINSWITH %@", label, label))
-        _ = query.firstMatch.waitForExistence(timeout: timeout)
+        _ = query.firstMatch.waitForExistence(timeout: min(timeout, 4))
+        // Long lists (e.g. "Apps" near the bottom of Settings): scroll until a hittable match shows up.
+        var swipes = 0
+        while query.allElementsBoundByIndex.first(where: { $0.exists && $0.isHittable }) == nil && swipes < 8 {
+            app.swipeUp(); swipes += 1; sleep(1)
+        }
         let el = query.allElementsBoundByIndex.filter { $0.exists && $0.isHittable }.max(by: { $0.frame.minY < $1.frame.minY }) ?? query.firstMatch
         if !el.exists {
             let tree = XCTAttachment(string: app.debugDescription); tree.name = "tree-before-\(label)"; tree.lifetime = .keepAlways; add(tree)
