@@ -13,7 +13,7 @@ If Claude has stopped (no Claude commit for 2+ hours), Codex may take `claude` t
 | deploy | claude | done | argo-sites `/keyboard` route; company page row #54 |
 | copy | grok | review | `launch/tweets.md` drafts (need a native-speaker edit; see the note at the top). page-copy.json and install-guide.md were not produced |
 | layout-review | grok | done | `agents/out/layout-review.md`; adopted ю under у; the rest is contradicted by the frequency data |
-| ios | claude | review | `ios/` + `.github/workflows/ios.yml` written, **not compiled yet**: waits for the GitHub repo (CI runs on macOS) |
-| testflight | user | blocked | GitHub repo + secrets ASC_KEY_ID, ASC_ISSUER_ID, APPLE_TEAM_ID, ASC_KEY_P8 (Admin key), App ID + app record |
+| ios | claude | done | Builds on macos-26 / Xcode 26.6; signed via tools/asc-signing.mjs (temporary cert + profiles per run) |
+| testflight | claude | done | Build 1 on TestFlight; owner in internal group "TrustChain team" (all builds). New build: Actions → iOS → Run workflow with upload |
 | android-review | codex | done | Independent review of `android/` and `ios/` Swift for bugs (touch handling, long-press, IME edge cases) |
 | translit | codex | later | Optional Latin→Cyrillic toggle, off by default |
