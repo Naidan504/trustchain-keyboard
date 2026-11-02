@@ -43,6 +43,13 @@ jobs:
           xcrun simctl install "$DEV" build/Build/Products/Debug-iphonesimulator/TrustChainKeyboard.app
           xcrun simctl launch "$DEV" mn.trustchain.keyboard
           sleep 8
+          echo "--- extension Info.plist"
+          plutil -p build/Build/Products/Debug-iphonesimulator/TrustChainKeyboard.app/PlugIns/Keyboard.appex/Info.plist
+          echo "--- pluginkit: registered keyboard extensions"
+          xcrun simctl spawn "$DEV" pluginkit -mAvvv -p com.apple.keyboard-service || true
+          echo "--- pluginkit: ours"
+          xcrun simctl spawn "$DEV" pluginkit -mAvvv -i mn.trustchain.keyboard.ext || true
+          xcrun simctl spawn "$DEV" log show --last 2m --style compact --predicate 'eventMessage CONTAINS[c] "mn.trustchain.keyboard"' | tail -n 40 || true
           xcrun simctl io "$DEV" screenshot setup-screen.png
       - uses: actions/upload-artifact@v4
         if: always()
