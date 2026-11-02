@@ -1,0 +1,2 @@
+-keep class mn.trustchain.keyboard.TrustChainIME { *; }
+-keep class mn.trustchain.keyboard.SetupActivity { *; }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Setup" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:colorAccent">#2F6B3E</item>
+        <item name="android:colorPrimary">#2F6B3E</item>
+        <item name="android:statusBarColor">#2F6B3E</item>
+        <item name="android:windowBackground">#F6F7F8</item>
+    </style>
+    <color name="ink">#1F1F1F</color>
+    <color name="muted">#5F6368</color>
+    <color name="brand">#2F6B3E</color>
+</resources>
