@@ -45,6 +45,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.keyboard.ext
         PRODUCT_NAME: Keyboard
+        APPLICATION_EXTENSION_API_ONLY: YES
       configs:
         Release:
           CODE_SIGN_STYLE: Manual
