@@ -81,7 +81,8 @@ for (let i = 0; i < users.length; i++) {
     }
     if (e.status !== 409) throw e;
     const t = (await api('GET', `/v1/betaTesters?filter[email]=${encodeURIComponent(email)}&limit=1`)).data[0];
-    if (t) await api('POST', `/v1/betaGroups/${group.id}/relationships/betaTesters`, { data: [{ type: 'betaTesters', id: t.id }] });
+    if (t) await api('POST', `/v1/betaGroups/${group.id}/relationships/betaTesters`, { data: [{ type: 'betaTesters', id: t.id }] })
+      .catch(err => console.log(`  group add: ${err.message} (usually: already in the group)`));
     console.log(`${masked} already a tester; ensured in group`);
   }
 }
@@ -98,6 +99,9 @@ for (const t of testers) {
     console.log(`  invitation email sent to ${masked}`);
   } catch (e) { console.log(`  invitation: ${e.message}`); }
 }
-const groupBuilds = (await api('GET', `/v1/betaGroups/${group.id}/builds?limit=5`)).data;
-console.log(`builds visible to the group: ${groupBuilds.map(b => b.attributes.version).join(', ') || 'none (hasAccessToAllBuilds should cover it)'}`);
+for (const g of (await api('GET', `/v1/apps/${app.id}/betaGroups?limit=50`)).data.filter(g => g.attributes.isInternalGroup)) {
+  const gb = (await api('GET', `/v1/betaGroups/${g.id}/builds?limit=10`)).data.map(b => b.attributes.version);
+  const gt = (await api('GET', `/v1/betaGroups/${g.id}/betaTesters?limit=50`)).data.map(t => `${String(t.attributes.email).replace(/^(.).*(@.*)$/, '$1***$2')} (${t.attributes.state ?? '-'})`);
+  console.log(`group "${g.attributes.name}" ${g.id.slice(0, 8)}: allBuilds=${g.attributes.hasAccessToAllBuilds} builds=[${gb.join(', ')}] testers=[${gt.join(', ')}]`);
+}
 console.log('done: open the TestFlight email on your iPhone and tap "View in TestFlight".');
