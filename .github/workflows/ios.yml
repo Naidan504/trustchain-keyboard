@@ -118,6 +118,23 @@ jobs:
             -configuration Release -destination 'generic/platform=iOS' \
             -archivePath build/TrustChainKeyboard.xcarchive archive \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CURRENT_PROJECT_VERSION=${{ github.run_number }} | tail -n 60
+      - name: Inspect signed app and extension
+        working-directory: ios
+        run: |
+          A=build/TrustChainKeyboard.xcarchive/Products/Applications/TrustChainKeyboard.app
+          for B in "$A" "$A/PlugIns/Keyboard.appex"; do
+            echo "===== $B"
+            codesign -dvv "$B" 2>&1 | grep -E "Identifier|Authority|TeamIdentifier|Format" || true
+            echo "--- entitlements"; codesign -d --entitlements - --xml "$B" 2>/dev/null | plutil -p - || true
+            echo "--- profile"; security cms -D -i "$B/embedded.mobileprovision" 2>/dev/null | plutil -extract Entitlements xml1 -o - - | plutil -p - || echo "no embedded profile"
+            echo "--- Info.plist NSExtension / ids"; plutil -p "$B/Info.plist" | grep -E "CFBundleIdentifier|CFBundleVersion|CFBundleShortVersionString|MinimumOSVersion|NSExtension|PrincipalClass|PointIdentifier|PrimaryLanguage" || true
+          done
+          codesign --verify --deep --strict -v "$A" 2>&1 | tail -3
+          ditto -c -k --keepParent "$A" build/signed-app.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-app
+          path: ios/build/signed-app.zip
       - name: Export and upload to App Store Connect
         working-directory: ios
         run: |

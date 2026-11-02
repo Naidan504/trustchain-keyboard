@@ -14,10 +14,10 @@ final class SetupViewController: UIViewController {
         let title = label("TrustChain Keyboard", size: 28, weight: .bold, color: brand)
         let lead = label("35 үсэг, 27 том товч. Ховор үсгүүд холбоотой товчоо удаан дарахад гарна: г→к, ш→щ, э→е, б→п, в→ф, ь→ъ, я→ю ё.", size: 17)
         let stepsTitle = label("Гараа нэмэх", size: 20, weight: .semibold)
-        let steps = label("1. Settings → General → Keyboard → Keyboards\n2. Add New Keyboard… → TrustChain Keyboard\n3. Бичих үедээ 🌐 товчийг дарж TrustChain гар руу шилжинэ.", size: 16)
+        let steps = label("1. Settings (Тохиргоо) аппыг нээнэ → General → Keyboard → Keyboards\n2. Add New Keyboard… → «Third-Party Keyboards» хэсгээс TrustChain Keyboard\n3. Бичих үедээ 🌐 товчийг дарж TrustChain гар руу шилжинэ.", size: 16)
 
         let open = UIButton(type: .system)
-        open.setTitle("Settings нээх", for: .normal)
+        open.setTitle("Тохиргоо нээх", for: .normal)
         open.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
         open.backgroundColor = brand
         open.setTitleColor(.systemBackground, for: .normal)
