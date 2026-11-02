@@ -1,5 +1,7 @@
 # TrustChain Keyboard launch tweets
 
+> Drafts by Grok, not yet edited. Before posting, fix: "холбогч товч дээр дараад" → "удаан дарахад"; tweet 4 wrongly says щ is impossible on the standard keyboard (it is only tiny there); the Latin version 1 has Cyrillic letters mixed in.
+
 1. **Problem/Solution** (use when explaining the pain)
 Монгол кирилл 35 үсэгтэй. Стандарт гар 12-13 жижигхэн товчтой, хуруу өвдөнө. 
 TrustChain Keyboard бол 27 том товчтой, жинхэнэ монгол дараалалтай, ховор үсгүүд (щ, ё, ъ гэх мэт) холбогч товч дээр дараад гарна. Систем гар учраас бүх апп дээр ажиллана. Үнэгүй.

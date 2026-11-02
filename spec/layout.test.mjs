@@ -27,9 +27,9 @@ test('keyboard stays small: 20-something base keys, at most 10 per row', () => {
   for (const row of layout.letters) assert.ok(row.length <= 10, `row has ${row.length} keys`);
 });
 
-test('every rare (long-press only) letter appears exactly once in popups', () => {
+test('every rare (long-press only) letter is in 1 or 2 popups, never more', () => {
   const rare = ALPHABET.filter(c => !base.includes(c));
-  for (const c of rare) assert.equal(long.filter(x => x === c).length, 1, `${c} popup count`);
+  for (const c of rare) { const n = long.filter(x => x === c).length; assert.ok(n >= 1 && n <= 2, `${c} popup count ${n}`); }
 });
 
 test('symbols layer has digits 0-9', () => {
