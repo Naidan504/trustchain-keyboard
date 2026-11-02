@@ -21,9 +21,11 @@ final class KeyboardUITests: XCTestCase {
     /// element tree after every step, so a failure shows exactly where navigation stopped.
     private func tapText(_ app: XCUIApplication, _ label: String, timeout: TimeInterval = 10) {
         step += 1
-        let exact = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
-        let prefix = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", label)).firstMatch
-        let el = exact.waitForExistence(timeout: timeout) ? exact : prefix
+        // Several elements can match (e.g. the page title "Keyboards" and the row "Keyboards  2"):
+        // take the lowest hittable one on screen, which is the row, not the navigation title.
+        let query = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR label BEGINSWITH %@", label, label))
+        _ = query.firstMatch.waitForExistence(timeout: timeout)
+        let el = query.allElementsBoundByIndex.filter { $0.exists && $0.isHittable }.max(by: { $0.frame.minY < $1.frame.minY }) ?? query.firstMatch
         if !el.exists {
             let tree = XCTAttachment(string: app.debugDescription); tree.name = "tree-before-\(label)"; tree.lifetime = .keepAlways; add(tree)
             shot("step\(step)-missing-\(label)", app)
