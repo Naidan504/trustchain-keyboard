@@ -63,7 +63,8 @@ if (!group) {
 
 // Every team user becomes an internal tester (an individual account has just the owner).
 const users = (await api('GET', '/v1/users?limit=50')).data;
-for (const u of users) {
+for (let i = 0; i < users.length; i++) {
+  const u = users[i];
   const email = u.attributes.username;
   const masked = email.replace(/^(.).*(@.*)$/, '$1***$2');
   try {
@@ -74,6 +75,9 @@ for (const u of users) {
     } });
     console.log(`added ${masked}`);
   } catch (e) {
+    if (e.status === 404 && !u.retried) { // a new group can take a moment to become visible
+      u.retried = true; await new Promise(r => setTimeout(r, 20_000)); users.push(u); continue;
+    }
     if (e.status !== 409) throw e;
     const t = (await api('GET', `/v1/betaTesters?filter[email]=${encodeURIComponent(email)}&limit=1`)).data[0];
     if (t) await api('POST', `/v1/betaGroups/${group.id}/relationships/betaTesters`, { data: [{ type: 'betaTesters', id: t.id }] });
