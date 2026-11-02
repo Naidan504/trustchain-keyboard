@@ -14,9 +14,14 @@ on:
 jobs:
   build:
     name: Simulator build (unsigned)
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
+      - name: Use the newest Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          test -n "$X" || { echo "no Xcode 26 on this runner"; ls -d /Applications/Xcode*; exit 1; }
+          sudo xcode-select -s "$X"; xcodebuild -version
       - run: brew install xcodegen
       - run: node tools/sync-spec.mjs
       - name: Generate Xcode project
@@ -50,7 +55,7 @@ jobs:
     name: Upload to TestFlight
     needs: build
     if: github.event_name == 'workflow_dispatch' && inputs.upload
-    runs-on: macos-15
+    runs-on: macos-26
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -61,6 +66,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Use the newest Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          test -n "$X" || { echo "no Xcode 26 on this runner"; ls -d /Applications/Xcode*; exit 1; }
+          sudo xcode-select -s "$X"; xcodebuild -version
       - run: brew install xcodegen
       - run: node tools/sync-spec.mjs
       - working-directory: ios

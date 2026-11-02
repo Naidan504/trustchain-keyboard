@@ -32,7 +32,7 @@ targets:
         CFBundleDisplayName: TrustChain Keyboard
         LSRequiresIPhoneOS: true
         UILaunchScreen: {}
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         ITSAppUsesNonExemptEncryption: false
   Keyboard:
     type: app-extension
