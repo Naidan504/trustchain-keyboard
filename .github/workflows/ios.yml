@@ -91,6 +91,7 @@ jobs:
           xcrun simctl boot "$DEV"
           xcrun simctl install "$DEV" build/control/Debug-iphonesimulator/ControlHost.app
           xcrun simctl spawn "$DEV" pluginkit -mA -p com.apple.keyboard-service || true
+          set +e
           xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
             -destination "id=$DEV" -resultBundlePath build/ui-mn.xcresult CODE_SIGNING_ALLOWED=NO > build/test.log 2>&1
           RC=$?

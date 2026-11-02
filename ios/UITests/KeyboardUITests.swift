@@ -52,6 +52,33 @@ final class KeyboardUITests: XCTestCase {
         return settings
     }
 
+    /// iOS 18+/26: app settings live under Settings → Apps → <app>. Look for a "Keyboards" row there.
+    private func openAppSettings(_ appName: String, _ tag: String) -> XCUIApplication {
+        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+        settings.terminate()
+        settings.launch()
+        tapText(settings, "Apps")
+        let search = settings.searchFields.firstMatch
+        if search.waitForExistence(timeout: 3) { search.tap(); search.typeText(appName); sleep(1) }
+        shot("\(tag)-apps-list", settings)
+        tapText(settings, appName)
+        sleep(2)
+        shot("\(tag)-app-page", settings)
+        let tree = XCTAttachment(string: settings.debugDescription); tree.name = "\(tag)-tree-app-page"; tree.lifetime = .keepAlways; add(tree)
+        return settings
+    }
+
+    func testAppPagesShowKeyboards() throws {
+        XCUIApplication().launch(); sleep(2)
+        for (name, tag) in [("Control Host", "control"), ("TrustChain Keyboard", "ours")] {
+            let settings = openAppSettings(name, tag)
+            let row = settings.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Keyboard'")).firstMatch
+            XCTAssertTrue(row.waitForExistence(timeout: 5), "\(name): no Keyboards row on its app page")
+            if row.exists { row.tap(); sleep(2); shot("\(tag)-keyboards-page", settings)
+                let t = XCTAttachment(string: settings.debugDescription); t.name = "\(tag)-tree-keyboards-page"; t.lifetime = .keepAlways; add(t) }
+        }
+    }
+
     /// Control: Apple's keyboard template ("Control KB", installed by CI from the ControlHost app).
     func testControlKeyboardIsOffered() throws {
         let settings = openAddNewKeyboard("control")
