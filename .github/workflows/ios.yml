@@ -73,25 +73,31 @@ jobs:
       - run: node tools/sync-spec.mjs
       - working-directory: ios
         run: xcodegen
-      - name: Run UI test for each PrimaryLanguage variant
+      - name: Build the control keyboard host (Apple template, test only)
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild -project TrustChainKeyboard.xcodeproj -target ControlHost -sdk iphonesimulator \
+            -configuration Debug CODE_SIGNING_ALLOWED=NO SYMROOT=$PWD/build/control build | tail -n 5
+          ls build/control/Debug-iphonesimulator/ControlHost.app/PlugIns
+      - name: Run UI tests (ours + control)
         working-directory: ios
         run: |
           DEV=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone 1[5-7][^(]*\(([0-9A-F-]{36})\)' | grep -oE '[0-9A-F-]{36}')
           echo "simulator $DEV"
-          mkdir -p build; : > build/summary.txt
-          for LANG_ in en-US mn-MN mn; do
-            xcrun simctl shutdown "$DEV" 2>/dev/null || true
-            xcrun simctl erase "$DEV"
-            if xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
-                 -destination "id=$DEV" -resultBundlePath build/ui-$LANG_.xcresult \
-                 CODE_SIGNING_ALLOWED=NO KEYBOARD_PRIMARY_LANGUAGE=$LANG_ > build/test-$LANG_.log 2>&1; then
-              echo "PrimaryLanguage=$LANG_: PASS (listed + typing works)" | tee -a build/summary.txt
-            else
-              echo "PrimaryLanguage=$LANG_: FAIL — $(grep -m1 -oE 'error: .*' build/test-$LANG_.log | cut -c1-200)" | tee -a build/summary.txt
-            fi
-          done
-          echo "=== SUMMARY"; cat build/summary.txt
-          grep -q "PrimaryLanguage=mn: PASS" build/summary.txt
+          mkdir -p build
+          xcrun simctl shutdown "$DEV" 2>/dev/null || true
+          xcrun simctl erase "$DEV"
+          xcrun simctl boot "$DEV"
+          xcrun simctl install "$DEV" build/control/Debug-iphonesimulator/ControlHost.app
+          xcrun simctl spawn "$DEV" pluginkit -mA -p com.apple.keyboard-service || true
+          xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
+            -destination "id=$DEV" -resultBundlePath build/ui-mn.xcresult CODE_SIGNING_ALLOWED=NO > build/test.log 2>&1
+          RC=$?
+          echo "=== pluginkit after tests"; xcrun simctl spawn "$DEV" pluginkit -mA -p com.apple.keyboard-service || true
+          echo "=== SUMMARY"
+          grep -E "Test Case .*(passed|failed)|error: " build/test.log | cut -c1-250 | tee build/summary.txt
+          exit $RC
       - name: Export screenshots
         if: always()
         working-directory: ios

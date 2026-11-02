@@ -36,18 +36,38 @@ final class KeyboardUITests: XCTestCase {
         shot("step\(step)-after-\(label)", app)
     }
 
-    func testKeyboardIsOfferedAndTypes() throws {
-        // --- 1. Add the keyboard in Settings
+    /// Settings → General → Keyboard → Keyboards → Add New Keyboard; returns Settings on that screen.
+    private func openAddNewKeyboard(_ tag: String) -> XCUIApplication {
         let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+        settings.terminate()
         settings.launch()
-        shot("step0-settings", settings)
+        shot("\(tag)-step0-settings", settings)
         tapText(settings, "General")
         tapText(settings, "Keyboard")
         tapText(settings, "Keyboards")
         tapText(settings, "Add New Keyboard")
         sleep(2)
-        shot("1-add-new-keyboard", settings)
-        let addTree = XCTAttachment(string: settings.debugDescription); addTree.name = "tree-add-new-keyboard"; addTree.lifetime = .keepAlways; add(addTree)
+        shot("\(tag)-add-new-keyboard", settings)
+        let tree = XCTAttachment(string: settings.debugDescription); tree.name = "\(tag)-tree-add-new-keyboard"; tree.lifetime = .keepAlways; add(tree)
+        return settings
+    }
+
+    /// Control: Apple's keyboard template ("Control KB", installed by CI from the ControlHost app).
+    func testControlKeyboardIsOffered() throws {
+        let settings = openAddNewKeyboard("control")
+        let kb = settings.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Control KB")).firstMatch
+        XCTAssertTrue(kb.waitForExistence(timeout: 10), "CONTROL keyboard (Apple template) is NOT offered either")
+    }
+
+    func testKeyboardIsOfferedAndTypes() throws {
+        // Launch our app once first, in case iOS only offers keyboards of apps that have run.
+        let first = XCUIApplication()
+        first.launch()
+        sleep(2)
+        first.terminate()
+
+        // --- 1. Add the keyboard in Settings
+        let settings = openAddNewKeyboard("ours")
         let ours = settings.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
         XCTAssertTrue(ours.waitForExistence(timeout: 10), "TrustChain Keyboard is NOT offered in Add New Keyboard")
         ours.tap()

@@ -78,6 +78,41 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.keyboard.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: TrustChainKeyboard
+  ControlHost:
+    type: application
+    platform: iOS
+    sources:
+      - Control/Host
+    dependencies:
+      - target: ControlKB
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.control
+    info:
+      path: Control/Host/Info.plist
+      properties:
+        CFBundleDisplayName: Control Host
+        UILaunchScreen: {}
+  ControlKB:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Control/KB
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.control.kb
+    info:
+      path: Control/KB/Info.plist
+      properties:
+        CFBundleDisplayName: Control KB
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+            PrimaryLanguage: en-US
+            RequestsOpenAccess: false
 schemes:
   TrustChainKeyboard:
     build:
