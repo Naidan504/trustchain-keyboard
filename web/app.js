@@ -197,6 +197,9 @@ kb.addEventListener('pointermove', e => {
 kb.addEventListener('pointerup', e => { if (act && e.pointerId === act.id) release(true); });
 kb.addEventListener('pointercancel', () => release(false));
 kb.addEventListener('contextmenu', e => e.preventDefault());
+// iOS Safari: stop double-tap zoom and synthesized clicks when tapping the same key twice fast.
+kb.addEventListener('touchend', e => e.preventDefault(), { passive: false });
+kb.addEventListener('dblclick', e => e.preventDefault());
 
 // ---------- buttons ----------
 function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(t.h); t.h = setTimeout(() => t.classList.remove('show'), 1400); }
