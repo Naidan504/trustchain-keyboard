@@ -16,22 +16,36 @@ final class KeyboardUITests: XCTestCase {
         add(a)
     }
 
-    private func tapText(_ app: XCUIApplication, beginsWith prefix: String, timeout: TimeInterval = 10) {
-        let el = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", prefix)).firstMatch
-        XCTAssertTrue(el.waitForExistence(timeout: timeout), "'\(prefix)' not found")
+    private var step = 0
+    /// Taps the first element whose label equals `label` (else begins with it); records a screenshot and the
+    /// element tree after every step, so a failure shows exactly where navigation stopped.
+    private func tapText(_ app: XCUIApplication, _ label: String, timeout: TimeInterval = 10) {
+        step += 1
+        let exact = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
+        let prefix = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", label)).firstMatch
+        let el = exact.waitForExistence(timeout: timeout) ? exact : prefix
+        if !el.exists {
+            let tree = XCTAttachment(string: app.debugDescription); tree.name = "tree-before-\(label)"; tree.lifetime = .keepAlways; add(tree)
+            shot("step\(step)-missing-\(label)", app)
+            XCTFail("'\(label)' not found"); return
+        }
         el.tap()
+        sleep(1)
+        shot("step\(step)-after-\(label)", app)
     }
 
     func testKeyboardIsOfferedAndTypes() throws {
         // --- 1. Add the keyboard in Settings
         let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
         settings.launch()
-        tapText(settings, beginsWith: "General")
-        tapText(settings, beginsWith: "Keyboard")
-        tapText(settings, beginsWith: "Keyboards")
-        tapText(settings, beginsWith: "Add New Keyboard")
+        shot("step0-settings", settings)
+        tapText(settings, "General")
+        tapText(settings, "Keyboard")
+        tapText(settings, "Keyboards")
+        tapText(settings, "Add New Keyboard")
         sleep(2)
         shot("1-add-new-keyboard", settings)
+        let addTree = XCTAttachment(string: settings.debugDescription); addTree.name = "tree-add-new-keyboard"; addTree.lifetime = .keepAlways; add(addTree)
         let ours = settings.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
         XCTAssertTrue(ours.waitForExistence(timeout: 10), "TrustChain Keyboard is NOT offered in Add New Keyboard")
         ours.tap()
