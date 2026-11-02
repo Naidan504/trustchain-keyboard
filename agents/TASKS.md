@@ -15,5 +15,5 @@ If Claude has stopped (no Claude commit for 2+ hours), Codex may take `claude` t
 | layout-review | grok | done | `agents/out/layout-review.md`; adopted ю under у; the rest is contradicted by the frequency data |
 | ios | claude | review | `ios/` + `.github/workflows/ios.yml` written, **not compiled yet**: waits for the GitHub repo (CI runs on macOS) |
 | testflight | user | blocked | GitHub repo + secrets ASC_KEY_ID, ASC_ISSUER_ID, APPLE_TEAM_ID, ASC_KEY_P8 (Admin key), App ID + app record |
-| android-review | codex | open (needs bubblewrap) | Independent review of `android/` and `ios/` Swift for bugs (touch handling, long-press, IME edge cases) |
+| android-review | codex | done | Independent review of `android/` and `ios/` Swift for bugs (touch handling, long-press, IME edge cases) |
 | translit | codex | later | Optional Latin→Cyrillic toggle, off by default |
