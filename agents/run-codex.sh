@@ -22,7 +22,7 @@ cd "$wt" || exit 1
 git merge -q --no-edit origin/main || { echo "merge of main failed"; git merge --abort; }
 
 prompt="You are Codex, a contributor to TrustChain Keyboard. Read AGENTS.md, then do task '$id' exactly as described in agents/tasks/$id.md. Work only in this folder (a git worktree on branch $branch); don't run git commit or push, since the runner does that. There is no network access in your sandbox, so skip any step that needs it and say so in agents/out/$id.md. $extra"
-codex exec -s workspace-write -C "$wt" -o "$logs/$id.last.md" "$prompt"
+codex exec -s workspace-write -C "$wt" -o "$logs/$id.last.md" "$prompt" < /dev/null
 rc=$?
 echo "=== codex exit $rc"
 
