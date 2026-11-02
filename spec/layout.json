@@ -1,0 +1,50 @@
+{
+  "name": "TrustChain Keyboard",
+  "version": 1,
+  "about": "Single source of truth for every platform. Letter rows keep the order of the standard Mongolian (MNS 5217) layout so existing typists feel at home; the 8 rarest letters move to long-press on a related key. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
+  "longPressMs": 300,
+  "letters": [
+    [
+      { "k": "ц" }, { "k": "у", "long": ["ү"] }, { "k": "ж" }, { "k": "э", "long": ["е"] }, { "k": "н" },
+      { "k": "г", "long": ["к"] }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }
+    ],
+    [
+      { "k": "й" }, { "k": "ы" }, { "k": "б", "long": ["п"] }, { "k": "ө" }, { "k": "а" },
+      { "k": "х" }, { "k": "р" }, { "k": "о", "long": ["ө"] }, { "k": "л" }, { "k": "д" }
+    ],
+    [
+      { "k": "я", "long": ["ю", "ё"] }, { "k": "ч" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
+      { "k": "т" }, { "k": "ь", "long": ["ъ"] }, { "k": "в", "long": ["ф"] }
+    ]
+  ],
+  "row3": { "left": "shift", "right": "backspace" },
+  "bottom": [
+    { "type": "symbols", "label": "?123" },
+    { "type": "switch", "label": "🌐", "about": "next keyboard / input method; hidden on iOS when the system shows its own globe key" },
+    { "type": "char", "k": ",", "long": ["!", "?", ";", ":", "-"] },
+    { "type": "space", "label": "TrustChain" },
+    { "type": "char", "k": ".", "long": ["?", "!", "…", "\"", "'"] },
+    { "type": "enter", "label": "⏎" }
+  ],
+  "symbols": [
+    ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+    ["@", "#", "₮", "%", "&", "-", "+", "(", ")", "/"],
+    ["*", "\"", "'", ":", ";", "!", "?", "_", "№"]
+  ],
+  "symbolsLong": { "₮": ["$", "€", "₽", "¥"], "-": ["–", "—"], "\"": ["«", "»", "“", "”"], "?": ["¿"], "!": ["¡"] },
+  "topBar": {
+    "brand": "TrustChain",
+    "brandUrl": "https://trustchain.mn",
+    "share": {
+      "label": "Share",
+      "text": "Монгол кирилл бичгийн шинэ гар: том товчтой, ховор үсэг нь удаан дарахад гарна. TrustChain Keyboard",
+      "url": "https://trustchain.mn/keyboard"
+    }
+  },
+  "rules": {
+    "autoCapitalize": "sentence start (after . ! ? and a space, and at the start of a field)",
+    "doubleSpacePeriod": true,
+    "shift": "tap = next letter capital; double tap = caps lock",
+    "noNetwork": "The keyboard never uses the network and never stores what is typed."
+  }
+}
