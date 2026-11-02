@@ -45,6 +45,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.keyboard.ext
         PRODUCT_NAME: Keyboard
+        KEYBOARD_PRIMARY_LANGUAGE: mn
         APPLICATION_EXTENSION_API_ONLY: YES
       configs:
         Release:
@@ -63,7 +64,7 @@ targets:
           NSExtensionAttributes:
             IsASCIICapable: false
             PrefersRightToLeft: false
-            PrimaryLanguage: mn
+            PrimaryLanguage: $(KEYBOARD_PRIMARY_LANGUAGE)
             RequestsOpenAccess: false
   UITests:
     type: bundle.ui-testing

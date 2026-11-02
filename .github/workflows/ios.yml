@@ -61,7 +61,7 @@ jobs:
 
   ui-test:
     name: UI test in the simulator (Settings lists the keyboard, typing works)
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || !inputs.upload
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
@@ -73,21 +73,31 @@ jobs:
       - run: node tools/sync-spec.mjs
       - working-directory: ios
         run: xcodegen
-      - name: Run UI test
+      - name: Run UI test for each PrimaryLanguage variant
         working-directory: ios
         run: |
-          set -o pipefail
           DEV=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone 1[5-7][^(]*\(([0-9A-F-]{36})\)' | grep -oE '[0-9A-F-]{36}')
           echo "simulator $DEV"
-          xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
-            -destination "id=$DEV" -resultBundlePath build/ui.xcresult \
-            CODE_SIGNING_ALLOWED=NO | tail -n 60
+          mkdir -p build; : > build/summary.txt
+          for LANG_ in en-US mn-MN mn; do
+            xcrun simctl shutdown "$DEV" 2>/dev/null || true
+            xcrun simctl erase "$DEV"
+            if xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
+                 -destination "id=$DEV" -resultBundlePath build/ui-$LANG_.xcresult \
+                 CODE_SIGNING_ALLOWED=NO KEYBOARD_PRIMARY_LANGUAGE=$LANG_ > build/test-$LANG_.log 2>&1; then
+              echo "PrimaryLanguage=$LANG_: PASS (listed + typing works)" | tee -a build/summary.txt
+            else
+              echo "PrimaryLanguage=$LANG_: FAIL — $(grep -m1 -oE 'error: .*' build/test-$LANG_.log | cut -c1-200)" | tee -a build/summary.txt
+            fi
+          done
+          echo "=== SUMMARY"; cat build/summary.txt
+          grep -q "PrimaryLanguage=mn: PASS" build/summary.txt
       - name: Export screenshots
         if: always()
         working-directory: ios
         run: |
-          mkdir -p build/shots
-          xcrun xcresulttool export attachments --path build/ui.xcresult --output-path build/shots || true
+          mkdir -p build/shots; cp build/summary.txt build/shots/ 2>/dev/null || true
+          for r in build/ui-*.xcresult; do n=$(basename $r .xcresult); mkdir -p build/shots/$n; xcrun xcresulttool export attachments --path $r --output-path build/shots/$n || true; done
           ls build/shots
       - uses: actions/upload-artifact@v4
         if: always()
