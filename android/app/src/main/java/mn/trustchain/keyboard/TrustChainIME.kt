@@ -31,6 +31,8 @@ class TrustChainIME : InputMethodService(), KeyboardView.Listener {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        lastSpaceAt = 0
+        lastShiftTap = 0
         val v = view ?: return
         val cls = (info?.inputType ?: 0) and InputType.TYPE_MASK_CLASS
         v.symbolsMode = cls == InputType.TYPE_CLASS_NUMBER || cls == InputType.TYPE_CLASS_PHONE

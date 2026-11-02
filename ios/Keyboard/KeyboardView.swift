@@ -197,6 +197,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let t = activeTouch, touches.contains(t) else { return }
         release(commit: false, event: event)
     }
 
@@ -239,6 +240,8 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
             if sel != popupSel { popupSel = sel; setNeedsDisplay() }
             return
         }
+        // Anchor a future popup to the finger's position when it opens, even after a small drift.
+        popupStartX = p.x
         guard let a = active, keys[a].def.kind == .char else { return }
         // Sliding to a neighbour before the long-press fires: the key under the finger counts.
         if let i = keyIndex(at: p), i != a, keys[i].def.kind == .char {

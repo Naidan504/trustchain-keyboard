@@ -318,6 +318,8 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
             if (sel != popupSel) { popupSel = sel; invalidate() }
             return
         }
+        // Anchor a future popup to the finger's position when it opens, even after a small drift.
+        popupStartX = x
         val cur = active ?: return
         if (cur.def.type != KeyDef.Type.CHAR) return
         // Sliding to a neighbour before the long-press fires: the key under the finger counts.
@@ -383,5 +385,6 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         handler.removeCallbacksAndMessages(null)
+        activeId = -1; active = null; popup = null; barTouch = null
     }
 }

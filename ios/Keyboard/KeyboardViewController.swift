@@ -7,6 +7,7 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
     private var heightConstraint: NSLayoutConstraint?
     private var lastShiftTap = Date.distantPast
     private var lastSpaceAt = Date.distantPast
+    private var lastKeyboardType: UIKeyboardType?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +25,8 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        lastSpaceAt = .distantPast
+        lastShiftTap = .distantPast
         if heightConstraint == nil {
             let rows = CGFloat(kb.rows.count)
             let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.barH + rows * KeyboardView.rowH + 4)
@@ -51,8 +54,10 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
     private func updateAppearance() {
         let proxyDark = textDocumentProxy.keyboardAppearance == .dark
         kb.dark = proxyDark || traitCollection.userInterfaceStyle == .dark
-        if let kt = textDocumentProxy.keyboardType, [.numberPad, .decimalPad, .phonePad, .numbersAndPunctuation].contains(kt) {
-            kb.symbolsMode = true
+        let keyboardType = textDocumentProxy.keyboardType
+        if keyboardType != lastKeyboardType {
+            kb.symbolsMode = keyboardType.map { [.numberPad, .decimalPad, .phonePad, .numbersAndPunctuation].contains($0) } ?? false
+            lastKeyboardType = keyboardType
         }
     }
 
