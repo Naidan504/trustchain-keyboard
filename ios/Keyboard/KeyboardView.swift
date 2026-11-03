@@ -7,10 +7,9 @@ protocol KeyboardViewDelegate: AnyObject {
     func kbSymbols(_ on: Bool)
     func kbGlobe(from view: UIView, with event: UIEvent?)
     func kbEnter()
-    func kbLayoutToggle()
 }
 
-/// The whole keyboard drawn in one view: keys, press preview and the long-press popup.
+/// The whole keyboard drawn in one view: brand bar, keys, press preview and the long-press popup.
 /// Same behaviour as the Android KeyboardView (one active touch; a new finger commits the previous key).
 final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
@@ -20,13 +19,12 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     var layout: Layout { didSet { rebuild() } }
     var shift: Shift = .off { didSet { if oldValue != shift { setNeedsDisplay() } } }
     var symbolsMode = false { didSet { if oldValue != symbolsMode { rebuild() } } }
-    var standardMode = false { didSet { if oldValue != standardMode { rebuild() } } }
     var dark = false { didSet { if oldValue != dark { setNeedsDisplay() } } }
 
     var enableInputClicksWhenVisible: Bool { true }
 
-    static let topPadding: CGFloat = 8
-    static let rowH: CGFloat = 60
+    static let barH: CGFloat = 36
+    static let rowH: CGFloat = 54
     private let gap: CGFloat = 3
     private let radius: CGFloat = 7
 
@@ -59,7 +57,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
     required init?(coder: NSCoder) { fatalError("not used") }
 
-    var rows: [[KeyDef]] { symbolsMode ? layout.symbols : (standardMode ? layout.lettersStandard : layout.letters) }
+    var rows: [[KeyDef]] { symbolsMode ? layout.symbols : layout.letters }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -72,10 +70,10 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         var out: [KeyRect] = []
         for (r, row) in rows.enumerated() {
             let total = row.reduce(0) { $0 + $1.weight }
-            // Short rows keep the key width of a 12-key row and are centred.
-            let unit = min(w / total, w / 12)
+            // Short rows keep the key width of a 10-key row and are centred, like a normal keyboard.
+            let unit = min(w / total, w / 10)
             var x = (w - unit * total) / 2
-            let top = Self.topPadding + CGFloat(r) * Self.rowH
+            let top = Self.barH + CGFloat(r) * Self.rowH
             for k in row {
                 let kw = unit * k.weight
                 out.append(KeyRect(def: k, rect: CGRect(x: x, y: top, width: kw, height: Self.rowH), row: r))
@@ -104,8 +102,9 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     override func draw(_ rect: CGRect) {
         cBg.setFill()
         UIRectFill(bounds)
+        drawString(layout.brand, at: CGPoint(x: 14 + 40, y: Self.barH / 2), size: 14, weight: .semibold, color: cAccent)
         for i in keys.indices { drawKey(i) }
-        if let a = active, keys.indices.contains(a) {
+        if let a = active {
             if popup != nil { drawPopup() }
             else if keys[a].def.kind == .char && !longFired { drawPreview(keys[a]) }
         }
@@ -117,7 +116,6 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         switch k.kind {
         case .char: return cased(k.text)
         case .shift: return shift == .lock ? "⇪" : "⇧"
-        case .space: return standardMode ? layout.standardName : layout.compactName
         default: return k.label
         }
     }
@@ -178,8 +176,8 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     // MARK: touch
 
     private func keyIndex(at p: CGPoint) -> Int? {
-        guard p.y >= Self.topPadding - 6 else { return nil }
-        let row = min(max(0, Int((p.y - Self.topPadding) / Self.rowH)), rows.count - 1)
+        guard p.y >= Self.barH - 6 else { return nil }
+        let row = min(max(0, Int((p.y - Self.barH) / Self.rowH)), rows.count - 1)
         let inRow = keys.indices.filter { keys[$0].row == row }
         if let hit = inRow.first(where: { p.x >= keys[$0].rect.minX && p.x < keys[$0].rect.maxX }) { return hit }
         return inRow.min(by: { abs(keys[$0].rect.midX - p.x) < abs(keys[$1].rect.midX - p.x) })
@@ -220,8 +218,6 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         switch k.kind {
         case .char where !k.long.isEmpty:
             startLongTimer()
-        case .space:
-            startLongTimer()
         case .backspace:
             delegate?.kbBackspace()
             repeatTimer = Timer.scheduledTimer(withTimeInterval: 0.38, repeats: false) { [weak self] _ in
@@ -250,7 +246,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         }
         // Anchor a future popup to the finger's position when it opens, even after a small drift.
         popupStartX = p.x
-        guard let a = active, keys.indices.contains(a), keys[a].def.kind == .char else { return }
+        guard let a = active, keys[a].def.kind == .char else { return }
         // Sliding to a neighbour before the long-press fires: the key under the finger counts.
         if let i = keyIndex(at: p), i != a, keys[i].def.kind == .char {
             longTimer?.invalidate()
@@ -264,13 +260,6 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     private func onLongPress() {
         guard let a = active else { return }
         let k = keys[a]
-        if k.def.kind == .space {
-            longFired = true
-            delegate?.kbLayoutToggle()
-            active = nil // row lengths changed; the old key index no longer describes the held space
-            setNeedsDisplay()
-            return
-        }
         guard !k.def.long.isEmpty else { return }
         longFired = true
         popupCellW = max(k.rect.width, 42)
@@ -294,7 +283,6 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         setNeedsDisplay()
         guard commit, let i = a else { return }
         if let opts = opts { delegate?.kbText(cased(opts[sel])); return }
-        if longFired { return }
         let k = keys[i].def
         switch k.kind {
         case .char: delegate?.kbText(cased(k.text))

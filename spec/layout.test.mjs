@@ -8,36 +8,28 @@ const ALPHABET = [...'абвгдеёжзийклмноөпрстуүфхцчшщ
 
 test('alphabet has 35 letters', () => assert.equal(ALPHABET.length, 35));
 
-for (const [name, rows] of Object.entries({ compact: layout.letters, standard: layout.lettersStandard })) {
-  const base = rows.flat().map(k => k.k);
-  const long = rows.flat().flatMap(k => k.long || []);
+const base = layout.letters.flat().map(k => k.k);
+const long = layout.letters.flat().flatMap(k => k.long || []);
 
-  test(`${name}: base keys are unique Mongolian letters`, () => {
-    assert.equal(new Set(base).size, base.length, 'duplicate base key');
-    for (const k of base) assert.ok(ALPHABET.includes(k), `not a letter: ${k}`);
-  });
+test('base keys are unique Mongolian letters', () => {
+  assert.equal(new Set(base).size, base.length, 'duplicate base key');
+  for (const k of base) assert.ok(ALPHABET.includes(k), `not a letter: ${k}`);
+});
 
-  test(`${name}: all 35 letters are reachable`, () => {
-    const reachable = new Set([...base, ...long]);
-    assert.deepEqual(ALPHABET.filter(c => !reachable.has(c)), []);
-  });
+test('every one of the 35 letters is reachable by tap or long-press', () => {
+  const reachable = new Set([...base, ...long]);
+  const missing = ALPHABET.filter(c => !reachable.has(c));
+  assert.deepEqual(missing, []);
+});
 
-  test(`${name}: rows have at most 12 keys`, () => {
-    for (const row of rows) assert.ok(row.length <= 12, `row has ${row.length} keys`);
-  });
+test('keyboard stays small: 20-something base keys, at most 10 per row', () => {
+  assert.ok(base.length >= 20 && base.length <= 29, `base keys: ${base.length}`);
+  for (const row of layout.letters) assert.ok(row.length <= 10, `row has ${row.length} keys`);
+});
 
-  test(`${name}: every hidden letter is in 1 or 2 popups`, () => {
-    const hidden = ALPHABET.filter(c => !base.includes(c));
-    for (const c of hidden) {
-      const n = long.filter(x => x === c).length;
-      assert.ok(n >= 1 && n <= 2, `${c} popup count ${n}`);
-    }
-  });
-}
-
-test('compact has 25–30 base keys', () => {
-  const n = layout.letters.flat().length;
-  assert.ok(n >= 25 && n <= 30, `base keys: ${n}`);
+test('every rare (long-press only) letter is in 1 or 2 popups, never more', () => {
+  const rare = ALPHABET.filter(c => !base.includes(c));
+  for (const c of rare) { const n = long.filter(x => x === c).length; assert.ok(n >= 1 && n <= 2, `${c} popup count ${n}`); }
 });
 
 test('symbols layer has digits 0-9', () => {

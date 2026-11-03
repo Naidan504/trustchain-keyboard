@@ -10,19 +10,15 @@ class LayoutTest {
     private val alphabet = "абвгдеёжзийклмноөпрстуүфхцчшщъыьэюя".map { it.toString() }
 
     @Test fun allLettersReachable() {
-        for (rows in listOf(layout.letters, layout.lettersStandard)) {
-            val chars = rows.dropLast(1).flatten().filter { it.type == KeyDef.Type.CHAR }
-            val reachable = chars.map { it.text }.toSet() + chars.flatMap { it.long }
-            assertEquals(emptyList<String>(), alphabet.filter { it !in reachable })
-        }
+        val chars = layout.letters.flatten().filter { it.type == KeyDef.Type.CHAR }
+        val reachable = chars.map { it.text }.toSet() + chars.flatMap { it.long }
+        assertEquals(emptyList<String>(), alphabet.filter { it !in reachable })
     }
 
     @Test fun rowsHaveShiftBackspaceAndBottomRow() {
-        for (rows in listOf(layout.letters, layout.lettersStandard)) {
-            val row3 = rows[2]
-            assertEquals(KeyDef.Type.SHIFT, row3.first().type)
-            assertEquals(KeyDef.Type.BACKSPACE, row3.last().type)
-        }
+        val row3 = layout.letters[2]
+        assertEquals(KeyDef.Type.SHIFT, row3.first().type)
+        assertEquals(KeyDef.Type.BACKSPACE, row3.last().type)
         val bottom = layout.letters.last().map { it.type }
         assertTrue(KeyDef.Type.SPACE in bottom && KeyDef.Type.ENTER in bottom && KeyDef.Type.SYMBOLS in bottom)
         assertTrue(KeyDef.Type.LETTERS in layout.symbols.last().map { it.type })

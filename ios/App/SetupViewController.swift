@@ -12,7 +12,7 @@ final class SetupViewController: UIViewController {
         view.backgroundColor = .systemBackground
 
         let title = label("TrustChain Keyboard", size: 28, weight: .bold, color: brand)
-        let lead = label("35 үсэгтэй хоёр байрлалтай гар. Компакт байрлалд ховор үсгүүд (е к щ п ъ ф) холбоотой товчоо удаан дарахад гарна.", size: 17)
+        let lead = label("35 үсэг, 27 том товч. Ховор үсгүүд холбоотой товчоо удаан дарахад гарна: г→к, ш→щ, э→е, б→п, в→ф, ь→ъ, я→ю ё.", size: 17)
         let stepsTitle = label("Гараа нэмэх", size: 20, weight: .semibold)
         let steps = label("1. Settings (Тохиргоо) аппыг нээнэ → General → Keyboard → Keyboards\n2. Add New Keyboard… → «Third-Party Keyboards» хэсгээс TrustChain Keyboard\n3. Бичих үедээ 🌐 товчийг дарж TrustChain гар руу шилжинэ.", size: 16)
 
@@ -24,13 +24,6 @@ final class SetupViewController: UIViewController {
         open.layer.cornerRadius = 12
         open.heightAnchor.constraint(equalToConstant: 52).isActive = true
         open.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
-
-        let layoutHint = label("Зай товчийг удаан дарж стандарт ⇄ компакт байрлал солино.", size: 15)
-        let share = UIButton(type: .system)
-        share.setTitle("Найздаа хуваалцах", for: .normal)
-        share.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        share.heightAnchor.constraint(equalToConstant: 52).isActive = true
-        share.addTarget(self, action: #selector(shareKeyboard(_:)), for: .touchUpInside)
 
         let test = UITextView()
         test.font = .systemFont(ofSize: 20)
@@ -44,7 +37,7 @@ final class SetupViewController: UIViewController {
         let privacy = label("Нууцлал: энэ гар «Full Access» шаарддаггүй, интернэт ашигладаггүй. Таны бичсэн зүйл утаснаас гарахгүй, хадгалагдахгүй.", size: 14, color: .secondaryLabel)
         let footer = label("© Трастчейн Туул ХХК · trustchain.mn", size: 13, color: .secondaryLabel)
 
-        let stack = UIStackView(arrangedSubviews: [title, lead, stepsTitle, steps, open, layoutHint, test, share, privacy, footer])
+        let stack = UIStackView(arrangedSubviews: [title, lead, stepsTitle, steps, open, test, privacy, footer])
         stack.axis = .vertical
         stack.spacing = 14
         stack.setCustomSpacing(24, after: lead)
@@ -80,13 +73,5 @@ final class SetupViewController: UIViewController {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
-    }
-
-    @objc private func shareKeyboard(_ sender: UIButton) {
-        let text = "Монгол кирилл бичгийн шинэ гар: том товчтой, ховор үсэг нь удаан дарахад гарна. TrustChain Keyboard https://trustchain.mn/keyboard"
-        let sheet = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-        sheet.popoverPresentationController?.sourceView = sender
-        sheet.popoverPresentationController?.sourceRect = sender.bounds
-        present(sheet, animated: true)
     }
 }

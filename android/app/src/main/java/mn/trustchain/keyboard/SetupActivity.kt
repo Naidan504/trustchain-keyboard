@@ -25,14 +25,6 @@ class SetupActivity : Activity() {
         step2 = findViewById(R.id.step2)
         step1.setOnClickListener { startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }
         step2.setOnClickListener { imm().showInputMethodPicker() }
-        findViewById<Button>(R.id.share).setOnClickListener {
-            val layout = Layout.parse(assets.open("layout.json").bufferedReader().use { reader -> reader.readText() })
-            val send = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "${layout.shareText} ${layout.shareUrl}")
-            }
-            startActivity(Intent.createChooser(send, getString(R.string.share)))
-        }
         findViewById<EditText>(R.id.test).requestFocus()
     }
 
