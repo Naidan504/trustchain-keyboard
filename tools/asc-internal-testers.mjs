@@ -3,7 +3,7 @@
 //   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (env)   node tools/asc-internal-testers.mjs
 import crypto from 'node:crypto';
 
-const BUNDLE_ID = 'mn.trustchain.keyboard';
+const BUNDLE_ID = 'com.trustchainmn.keyboard';
 const GROUP = 'TrustChain team';
 const { ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 } = process.env;
 if (!ASC_KEY_ID || !ASC_ISSUER_ID || !ASC_KEY_P8) { console.error('missing ASC_* env'); process.exit(1); }

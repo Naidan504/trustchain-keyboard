@@ -10,8 +10,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const TARGETS = [
-  { id: 'mn.trustchain.keyboard', name: 'TrustChain Keyboard', profile: 'TrustChain Keyboard AppStore CI' },
-  { id: 'mn.trustchain.keyboard.ext', name: 'TrustChain Keyboard Extension', profile: 'TrustChain Keyboard Ext AppStore CI' },
+  { id: 'com.trustchainmn.keyboard', name: 'TrustChain Keyboard', profile: 'TrustChain Keyboard AppStore CI' },
+  { id: 'com.trustchainmn.keyboard.ext', name: 'TrustChain Keyboard Extension', profile: 'TrustChain Keyboard Ext AppStore CI' },
 ];
 const { ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 } = process.env;
 if (!ASC_KEY_ID || !ASC_ISSUER_ID || !ASC_KEY_P8) { console.error('missing ASC_* env'); process.exit(1); }

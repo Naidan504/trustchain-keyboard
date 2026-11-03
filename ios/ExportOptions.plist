@@ -14,9 +14,9 @@
     <string>TEAM_ID_HERE</string>
     <key>provisioningProfiles</key>
     <dict>
-        <key>mn.trustchain.keyboard</key>
+        <key>com.trustchainmn.keyboard</key>
         <string>TrustChain Keyboard AppStore CI</string>
-        <key>mn.trustchain.keyboard.ext</key>
+        <key>com.trustchainmn.keyboard.ext</key>
         <string>TrustChain Keyboard Ext AppStore CI</string>
     </dict>
     <key>uploadSymbols</key>

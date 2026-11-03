@@ -42,15 +42,15 @@ jobs:
           DEV=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone 1[5-7][^(]*\(([0-9A-F-]{36})\)' | grep -oE '[0-9A-F-]{36}')
           xcrun simctl boot "$DEV"
           xcrun simctl install "$DEV" build/Build/Products/Debug-iphonesimulator/TrustChainKeyboard.app
-          xcrun simctl launch "$DEV" mn.trustchain.keyboard
+          xcrun simctl launch "$DEV" com.trustchainmn.keyboard
           sleep 8
           echo "--- extension Info.plist"
           plutil -p build/Build/Products/Debug-iphonesimulator/TrustChainKeyboard.app/PlugIns/Keyboard.appex/Info.plist
           echo "--- pluginkit: registered keyboard extensions"
           xcrun simctl spawn "$DEV" pluginkit -mAvvv -p com.apple.keyboard-service || true
           echo "--- pluginkit: ours"
-          xcrun simctl spawn "$DEV" pluginkit -mAvvv -i mn.trustchain.keyboard.ext || true
-          xcrun simctl spawn "$DEV" log show --last 2m --style compact --predicate 'eventMessage CONTAINS[c] "mn.trustchain.keyboard"' | tail -n 40 || true
+          xcrun simctl spawn "$DEV" pluginkit -mAvvv -i com.trustchainmn.keyboard.ext || true
+          xcrun simctl spawn "$DEV" log show --last 2m --style compact --predicate 'eventMessage CONTAINS[c] "com.trustchainmn.keyboard"' | tail -n 40 || true
           xcrun simctl io "$DEV" screenshot setup-screen.png
       - uses: actions/upload-artifact@v4
         if: always()
@@ -99,7 +99,7 @@ jobs:
           echo "=== pluginkit after tests"; xcrun simctl spawn "$DEV" pluginkit -mAvvv -p com.apple.keyboard-service | grep -E "^ |Path|Display|Parent" | head -20 || true
           echo "=== system log: keyboard catalog"
           xcrun simctl spawn "$DEV" log show --last 15m --style compact --info --debug \
-            --predicate '(process == "Preferences" OR subsystem CONTAINS[c] "TextInput" OR subsystem CONTAINS[c] "keyboard" OR eventMessage CONTAINS[c] "keyboard-service" OR eventMessage CONTAINS[c] "mn.trustchain") AND NOT eventMessage CONTAINS[c] "runningboard"' \
+            --predicate '(process == "Preferences" OR subsystem CONTAINS[c] "TextInput" OR subsystem CONTAINS[c] "keyboard" OR eventMessage CONTAINS[c] "keyboard-service" OR eventMessage CONTAINS[c] "trustchainmn") AND NOT eventMessage CONTAINS[c] "runningboard"' \
             > build/keyboard-log.txt 2>&1 || true
           wc -l build/keyboard-log.txt
           grep -iE "mn\.trustchain|third.?party|extension.*(ignor|reject|skip|filter|invalid|denied)|keyboard-service" build/keyboard-log.txt | cut -c1-300 | head -60
