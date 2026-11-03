@@ -119,13 +119,13 @@ final class KeyboardUITests: XCTestCase {
         shot("3-our-keyboard", app)
         XCTAssertTrue(ourKeyboard.waitForExistence(timeout: 5), "could not switch to TrustChain Keyboard")
 
-        // Key geometry mirrors KeyboardView: 36pt bar, 54pt rows; row 2 has 10 keys of width w/10.
+        // Key geometry mirrors KeyboardView: 8pt top margin, 54pt rows; row 2 has 10 keys of width w/10.
         let f = ourKeyboard.frame
         func key(row: Int, index: Int, keysInRow: CGFloat = 10) -> XCUICoordinate {
             let unit = f.width / 10
             let x0 = (f.width - unit * keysInRow) / 2
             let x = x0 + unit * (CGFloat(index) + 0.5)
-            let y = 36 + 54 * (CGFloat(row) + 0.5)
+            let y = 8 + 54 * (CGFloat(row) + 0.5)
             return ourKeyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: y))
         }
         // Row 2 (index 1): й ы б ө а х р о л д

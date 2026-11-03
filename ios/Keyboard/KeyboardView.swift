@@ -23,7 +23,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
     var enableInputClicksWhenVisible: Bool { true }
 
-    static let barH: CGFloat = 36
+    static let barH: CGFloat = 8 // top margin only; the brand bar was removed (C1)
     static let rowH: CGFloat = 54
     private let gap: CGFloat = 3
     private let radius: CGFloat = 7
@@ -102,7 +102,6 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     override func draw(_ rect: CGRect) {
         cBg.setFill()
         UIRectFill(bounds)
-        drawString(layout.brand, at: CGPoint(x: 14 + 40, y: Self.barH / 2), size: 14, weight: .semibold, color: cAccent)
         for i in keys.indices { drawKey(i) }
         if let a = active {
             if popup != nil { drawPopup() }

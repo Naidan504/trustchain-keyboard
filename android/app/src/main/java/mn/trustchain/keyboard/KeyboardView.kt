@@ -62,7 +62,7 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }
     private val hint = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER; color = cHint }
 
-    private val barH get() = 40 * dp
+    private val barH get() = 8 * dp // small top margin for row-1 previews (the brand/share bar was removed, C1)
     private val rowH: Float get() {
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         return (if (landscape) 42 else 56) * dp
@@ -130,8 +130,8 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
             inRow.lastOrNull()?.rect?.right = w
         }
         keys = out
-        brandRect.set(0f, 0f, w * 0.5f, barH)
-        shareRect.set(w * 0.62f, 0f, w, barH)
+        brandRect.setEmpty()
+        shareRect.setEmpty()
         requestLayout()
     }
 
@@ -139,7 +139,6 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
 
     override fun onDraw(canvas: Canvas) {
         canvas.drawColor(cBg)
-        drawBar(canvas)
         for (k in keys) drawKey(canvas, k)
         val a = active
         if (popup != null && a != null) drawPopup(canvas, a)

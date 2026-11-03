@@ -13,5 +13,7 @@
     <string name="status_ready">Бэлэн! Одоо бүх апп дээр (мэйл, мессенжер, X) ашиглаж болно.</string>
     <string name="test_hint">Энд бичиж туршаарай…</string>
     <string name="privacy">Нууцлал: энэ гар интернэт ашиглах эрхгүй. Таны бичсэн зүйл утаснаас гарахгүй, хадгалагдахгүй.</string>
+    <string name="share">Найздаа хуваалцах</string>
+    <string name="share_text">Монгол кирилл бичгийн шинэ гар: том товчтой, ховор үсэг нь удаан дарахад гарна. TrustChain Keyboard https://trustchain.mn/keyboard</string>
     <string name="footer">© Трастчейн Туул ХХК · trustchain.mn</string>
 </resources>
