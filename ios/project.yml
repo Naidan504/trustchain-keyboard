@@ -51,7 +51,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: mn.trustchain.keyboard.ext
         PRODUCT_NAME: Keyboard
-        KEYBOARD_PRIMARY_LANGUAGE: mn
+        KEYBOARD_PRIMARY_LANGUAGE: en-US
         APPLICATION_EXTENSION_API_ONLY: YES
       configs:
         Release:
