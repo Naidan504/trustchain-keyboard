@@ -14,6 +14,6 @@ If Claude has stopped (no Claude commit for 2+ hours), Codex may take `claude` t
 | copy | grok | review | `launch/tweets.md` drafts (need a native-speaker edit; see the note at the top). page-copy.json and install-guide.md were not produced |
 | layout-review | grok | done | `agents/out/layout-review.md`; adopted ю under у; the rest is contradicted by the frequency data |
 | ios | claude | done | Fixed "keyboard not listed": bundle IDs `com.trustchainmn.*` (iOS hides keyboards whose ID starts with `mn.`). UI test passes: listed, typing, long-press |
-| testflight | grok | blocked | Needs a new ASC app record for `com.trustchainmn.keyboard` (handoff R3), then upload + testers workflow |
+| testflight | claude | done | Build 41 in new app 6830161190 (`com.trustchainmn.keyboard`); owner confirmed the keyboard is listed on the iPhone (2026-11-03) |
 | android-review | codex | done | Independent review of `android/` and `ios/` Swift for bugs (touch handling, long-press, IME edge cases) |
 | translit | codex | later | Optional Latin→Cyrillic toggle, off by default |
