@@ -96,7 +96,13 @@ jobs:
           xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
             -destination "id=$DEV" -resultBundlePath build/ui-mn.xcresult CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= > build/test.log 2>&1
           RC=$?
-          echo "=== pluginkit after tests"; xcrun simctl spawn "$DEV" pluginkit -mA -p com.apple.keyboard-service || true
+          echo "=== pluginkit after tests"; xcrun simctl spawn "$DEV" pluginkit -mAvvv -p com.apple.keyboard-service | grep -E "^ |Path|Display|Parent" | head -20 || true
+          echo "=== system log: keyboard catalog"
+          xcrun simctl spawn "$DEV" log show --last 15m --style compact --info --debug \
+            --predicate '(process == "Preferences" OR subsystem CONTAINS[c] "TextInput" OR subsystem CONTAINS[c] "keyboard" OR eventMessage CONTAINS[c] "keyboard-service" OR eventMessage CONTAINS[c] "mn.trustchain") AND NOT eventMessage CONTAINS[c] "runningboard"' \
+            > build/keyboard-log.txt 2>&1 || true
+          wc -l build/keyboard-log.txt
+          grep -iE "mn\.trustchain|third.?party|extension.*(ignor|reject|skip|filter|invalid|denied)|keyboard-service" build/keyboard-log.txt | cut -c1-300 | head -60
           echo "=== SUMMARY"
           grep -E "Test Case .*(passed|failed)|error: " build/test.log | cut -c1-250 | tee build/summary.txt
           exit $RC
@@ -104,7 +110,7 @@ jobs:
         if: always()
         working-directory: ios
         run: |
-          mkdir -p build/shots; cp build/summary.txt build/shots/ 2>/dev/null || true
+          mkdir -p build/shots; cp build/summary.txt build/keyboard-log.txt build/shots/ 2>/dev/null || true
           for r in build/ui-*.xcresult; do n=$(basename $r .xcresult); mkdir -p build/shots/$n; xcrun xcresulttool export attachments --path $r --output-path build/shots/$n || true; done
           ls build/shots
       - uses: actions/upload-artifact@v4
