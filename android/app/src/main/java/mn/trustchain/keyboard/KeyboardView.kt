@@ -16,7 +16,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * The whole keyboard drawn on one canvas: top bar, keys, press preview and the long-press popup.
+ * The whole keyboard drawn on one canvas: keys, press preview and the long-press popup.
  * One view handles all touches, so it stays fast and the popup can slide freely.
  */
 @SuppressLint("ViewConstructor")
@@ -30,8 +30,7 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
         fun onSwitch()
         fun onSwitchPicker()
         fun onEnter()
-        fun onShare()
-        fun onBrand()
+        fun onLayoutToggle()
     }
 
     enum class Shift { OFF, ONCE, LOCK }
@@ -39,6 +38,8 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     var shift = Shift.OFF
         set(v) { if (field != v) { field = v; invalidate() } }
     var symbolsMode = false
+        set(v) { if (field != v) { field = v; rebuild(); invalidate() } }
+    var standardMode = false
         set(v) { if (field != v) { field = v; rebuild(); invalidate() } }
 
     private class KeyRect(val def: KeyDef, val rect: RectF, val row: Int)
@@ -62,22 +63,19 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }
     private val hint = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER; color = cHint }
 
-    private val barH get() = 40 * dp
+    private val topPadding get() = 8 * dp
     private val rowH: Float get() {
         val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        return (if (landscape) 42 else 56) * dp
+        return (if (landscape) 44 else 62) * dp
     }
     private val gap = 3 * dp
     private val radius = 7 * dp
 
     private var keys = listOf<KeyRect>()
-    private val shareRect = RectF()
-    private val brandRect = RectF()
 
     // Touch state: one active pointer at a time (a new finger commits the previous key).
     private var activeId = -1
     private var active: KeyRect? = null
-    private var barTouch: RectF? = null
     private var popup: List<String>? = null
     private var popupRect = RectF()
     private var popupCellW = 0f
@@ -99,24 +97,23 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        val rows = (if (symbolsMode) layout.symbols else layout.letters).size
-        setMeasuredDimension(w, (barH + rows * rowH + gap).roundToInt())
+        setMeasuredDimension(w, (topPadding + rowsNow.size * rowH + gap).roundToInt())
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) = rebuild()
 
     private fun rebuild() {
-        val rows = if (symbolsMode) layout.symbols else layout.letters
+        val rows = rowsNow
         val w = width.toFloat()
         if (w <= 0f) return
         val out = ArrayList<KeyRect>()
         rows.forEachIndexed { r, row ->
             val total = row.sumOf { it.weight.toDouble() }.toFloat()
-            // Rows with fewer keys keep the same key width as a 10-key row and are centred,
+            // Rows with fewer keys keep the same key width as a 12-key row and are centred,
             // so letters line up like on a normal keyboard.
-            val unit = minOf(w / total, w / 10f)
+            val unit = minOf(w / total, w / 12f)
             var x = (w - unit * total) / 2f
-            val top = barH + r * rowH
+            val top = topPadding + r * rowH
             for (k in row) {
                 val kw = unit * k.weight
                 out += KeyRect(k, RectF(x, top, x + kw, top + rowH), r)
@@ -130,8 +127,6 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
             inRow.lastOrNull()?.rect?.right = w
         }
         keys = out
-        brandRect.set(0f, 0f, w * 0.5f, barH)
-        shareRect.set(w * 0.62f, 0f, w, barH)
         requestLayout()
     }
 
@@ -139,33 +134,16 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
 
     override fun onDraw(canvas: Canvas) {
         canvas.drawColor(cBg)
-        drawBar(canvas)
         for (k in keys) drawKey(canvas, k)
         val a = active
         if (popup != null && a != null) drawPopup(canvas, a)
         else if (a != null && a.def.type == KeyDef.Type.CHAR && !longFired) drawPreview(canvas, a)
     }
 
-    private fun drawBar(canvas: Canvas) {
-        text.typeface = Typeface.DEFAULT_BOLD
-        text.textSize = 15 * dp
-        text.color = cAccent
-        text.textAlign = Paint.Align.LEFT
-        canvas.drawText(layout.brand, 14 * dp, barH / 2 + 5 * dp, text)
-        text.typeface = Typeface.DEFAULT
-        text.textAlign = Paint.Align.RIGHT
-        text.textSize = 14 * dp
-        if (barTouch === shareRect) {
-            fill.color = cKeyDown
-            canvas.drawRoundRect(RectF(shareRect.left, 4 * dp, shareRect.right - 6 * dp, barH - 4 * dp), radius, radius, fill)
-        }
-        canvas.drawText("${layout.shareLabel} ↗", width - 14 * dp, barH / 2 + 5 * dp, text)
-        text.textAlign = Paint.Align.CENTER
-    }
-
     private fun label(k: KeyDef): String = when (k.type) {
         KeyDef.Type.CHAR -> cased(k.text)
         KeyDef.Type.SHIFT -> if (shift == Shift.LOCK) "⇪" else "⇧"
+        KeyDef.Type.SPACE -> if (standardMode) layout.standardName else layout.compactName
         else -> k.label
     }
 
@@ -208,10 +186,10 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     }
 
     // Visual bounds of a centred row's edge keys (touch area is stretched to the screen edge).
-    private val rowsNow get() = if (symbolsMode) layout.symbols else layout.letters
+    private val rowsNow get() = if (symbolsMode) layout.symbols else if (standardMode) layout.lettersStandard else layout.letters
     private fun rowUnit(row: Int): Float {
         val total = rowsNow[row].sumOf { it.weight.toDouble() }.toFloat()
-        return minOf(width / total, width / 10f)
+        return minOf(width / total, width / 12f)
     }
     private fun rowOffset(row: Int): Float {
         val total = rowsNow[row].sumOf { it.weight.toDouble() }.toFloat()
@@ -259,8 +237,8 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     // ---------- touch ----------
 
     private fun keyAt(x: Float, y: Float): KeyRect? {
-        if (y < barH) return null
-        val row = ((y - barH) / rowH).toInt().coerceIn(0, rowsNow.size - 1)
+        if (y < topPadding) return null
+        val row = ((y - topPadding) / rowH).toInt().coerceIn(0, rowsNow.size - 1)
         val inRow = keys.filter { it.row == row }
         return inRow.firstOrNull { x >= it.rect.left && x < it.rect.right }
             ?: inRow.minByOrNull { abs(it.rect.centerX() - x) }
@@ -290,21 +268,14 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
         activeId = id
         longFired = false
         popup = null
-        if (y < barH) {
-            barTouch = when {
-                shareRect.contains(x, y) -> shareRect
-                brandRect.contains(x, y) -> brandRect
-                else -> null
-            }
-            invalidate(); return
-        }
-        val k = keyAt(x, y) ?: return
+        val k = keyAt(x, y) ?: run { activeId = -1; return }
         active = k
         performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         when (k.def.type) {
             KeyDef.Type.CHAR -> if (k.def.long.isNotEmpty()) handler.postDelayed(longPress, layout.longPressMs)
             KeyDef.Type.BACKSPACE -> { listener.onBackspace(); handler.postDelayed(repeat, 380) }
             KeyDef.Type.SWITCH -> handler.postDelayed(longPress, 450)
+            KeyDef.Type.SPACE -> handler.postDelayed(longPress, layout.longPressMs)
             else -> {}
         }
         popupStartX = x
@@ -339,6 +310,11 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
         val k = active ?: return
         longFired = true
         if (k.def.type == KeyDef.Type.SWITCH) { listener.onSwitchPicker(); return }
+        if (k.def.type == KeyDef.Type.SPACE) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            listener.onLayoutToggle()
+            return
+        }
         val opts = k.def.long
         if (opts.isEmpty()) return
         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
@@ -357,19 +333,14 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     private fun release(commit: Boolean) {
         handler.removeCallbacks(longPress)
         handler.removeCallbacks(repeat)
-        val bar = barTouch
         val k = active
         val opts = popup
-        activeId = -1; active = null; popup = null; barTouch = null
+        activeId = -1; active = null; popup = null
         invalidate()
         if (!commit) return
-        if (bar != null) {
-            if (bar === shareRect) listener.onShare() else listener.onBrand()
-            return
-        }
         if (k == null) return
         if (opts != null) { listener.onText(cased(opts[popupSel])); return }
-        if (longFired) return // switch key long-press already handled
+        if (longFired) return // switch or space long-press already handled
         when (k.def.type) {
             KeyDef.Type.CHAR -> listener.onText(cased(k.def.text))
             KeyDef.Type.SPACE -> listener.onText(" ")
@@ -385,6 +356,6 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         handler.removeCallbacksAndMessages(null)
-        activeId = -1; active = null; popup = null; barTouch = null
+        activeId = -1; active = null; popup = null
     }
 }

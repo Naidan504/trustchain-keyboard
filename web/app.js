@@ -11,7 +11,8 @@ const TEXT = {
 const $ = id => document.getElementById(id);
 const out = $('out');
 const kb = $('kb');
-let L, shift = 'off', symbols = false, lastShiftTap = 0, lastSpaceAt = 0;
+let L, shift = 'off', symbols = false, standard = false, lastShiftTap = 0, lastSpaceAt = 0;
+try { standard = localStorage.getItem('standardLayout') === 'true'; } catch {}
 
 fetch('layout.json').then(r => r.json()).then(j => { L = j; render(); autoShift(); });
 
@@ -74,7 +75,7 @@ function rows() {
   const bottom = L.bottom.map(b => {
     if (b.type === 'symbols') return symbols ? { type: 'letters', label: 'АБВ', w: 'w15' } : { type: 'symbols', label: b.label, w: 'w15' };
     if (b.type === 'switch') return null; // no other keyboard to switch to on the web
-    if (b.type === 'space') return { type: 'space', label: b.label };
+    if (b.type === 'space') return { type: 'space', label: L.layoutNames[standard ? 'standard' : 'compact'] };
     if (b.type === 'enter') return { type: 'enter', label: b.label, w: 'w15' };
     return { type: 'char', k: b.k, long: b.long };
   }).filter(Boolean);
@@ -83,7 +84,8 @@ function rows() {
     r[r.length - 1].push({ type: 'backspace', label: '⌫', w: 'w14' });
     return [...r, bottom];
   }
-  const r = L.letters.map(row => row.map(k => ({ type: 'char', k: k.k, long: k.long })));
+  const source = standard ? L.lettersStandard : L.letters;
+  const r = source.map(row => row.map(k => ({ type: 'char', k: k.k, long: k.long })));
   r[r.length - 1].unshift({ type: 'shift', label: shift === 'lock' ? '⇪' : '⇧', w: 'w14' });
   r[r.length - 1].push({ type: 'backspace', label: '⌫', w: 'w14' });
   return [...r, bottom];
@@ -130,7 +132,9 @@ function press(el, e) {
   const d = el.def;
   if (d.type === 'char') {
     showBubble(el, [d.k], -1);
-    if (d.long?.length) act.timer = setTimeout(longPress, L.longPressMs || 300);
+    if (d.long?.length) act.timer = setTimeout(longPress, L.longPressMs);
+  } else if (d.type === 'space') {
+    act.timer = setTimeout(longPress, L.longPressMs);
   } else if (d.type === 'backspace') {
     backspace(); autoShift();
     act.rep = setTimeout(function r() { backspace(); autoShift(); act && (act.rep = setTimeout(r, 45)); }, 380);
@@ -139,6 +143,14 @@ function press(el, e) {
 function longPress() {
   if (!act) return;
   act.fired = true;
+  if (act.def.type === 'space') {
+    standard = !standard;
+    try { localStorage.setItem('standardLayout', String(standard)); } catch {}
+    lastSpaceAt = 0;
+    render();
+    navigator.vibrate?.(15);
+    return;
+  }
   act.popup = act.def.long;
   act.cellW = showBubble(act.el, act.popup, 0);
   act.startX = act.lastX ?? act.startX;
@@ -153,6 +165,7 @@ function release(commit) {
   if (!commit) return;
   const d = a.def;
   if (a.popup) return typeChar(cased(a.popup[a.sel]));
+  if (a.fired) return;
   switch (d.type) {
     case 'char': return typeChar(cased(d.k));
     case 'space': return typeChar(' ');

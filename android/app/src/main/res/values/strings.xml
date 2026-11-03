@@ -4,7 +4,7 @@
     <string name="ime_name">TrustChain Keyboard</string>
     <string name="subtype_mn">Монгол (кирилл)</string>
     <string name="title">TrustChain Keyboard</string>
-    <string name="lead">35 үсэг, 27 том товч. Ховор үсгүүд (е к щ п ю ё ъ ф) холбоотой товчоо удаан дарахад гарна: г→к, ш→щ, э→е, б→п, в→ф, ь→ъ, я→ю ё.</string>
+    <string name="lead">35 үсэгтэй хоёр байрлалтай гар. Компакт байрлалд ховор үсгүүд (е к щ п ъ ф) холбоотой товчоо удаан дарахад гарна.</string>
     <string name="step1">1. Гарыг идэвхжүүлэх</string>
     <string name="step1_done">1. Идэвхжсэн ✓</string>
     <string name="step2">2. TrustChain Keyboard-ыг сонгох</string>
@@ -12,6 +12,8 @@
     <string name="status_todo">Дээрх 2 алхмыг хийгээд доор бичиж үзээрэй.</string>
     <string name="status_ready">Бэлэн! Одоо бүх апп дээр (мэйл, мессенжер, X) ашиглаж болно.</string>
     <string name="test_hint">Энд бичиж туршаарай…</string>
+    <string name="layout_hint">Зай товчийг удаан дарж стандарт ⇄ компакт байрлал солино.</string>
+    <string name="share">Найздаа хуваалцах</string>
     <string name="privacy">Нууцлал: энэ гар интернэт ашиглах эрхгүй. Таны бичсэн зүйл утаснаас гарахгүй, хадгалагдахгүй.</string>
     <string name="footer">© Трастчейн Туул ХХК · trustchain.mn</string>
 </resources>

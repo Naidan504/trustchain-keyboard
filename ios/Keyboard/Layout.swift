@@ -13,20 +13,23 @@ struct KeyDef {
 /// Parsed spec/layout.json (bundled as layout.json, the same file Android and the web use).
 struct Layout {
     let letters: [[KeyDef]]
+    let lettersStandard: [[KeyDef]]
     let symbols: [[KeyDef]]
     let longPressMs: Int
-    let brand: String
+    let compactName: String
+    let standardName: String
 
     private struct Spec: Decodable {
         struct Key: Decodable { let k: String; let long: [String]? }
         struct Bottom: Decodable { let type: String; let k: String?; let label: String?; let long: [String]? }
-        struct TopBar: Decodable { let brand: String? }
+        struct LayoutNames: Decodable { let compact: String; let standard: String }
         let longPressMs: Int?
         let letters: [[Key]]
+        let lettersStandard: [[Key]]
+        let layoutNames: LayoutNames
         let bottom: [Bottom]
         let symbols: [[String]]
         let symbolsLong: [String: [String]]?
-        let topBar: TopBar?
     }
 
     static func load(withGlobe: Bool) -> Layout {
@@ -54,18 +57,23 @@ struct Layout {
             }
         }
 
-        var letters = spec.letters.map { row in row.map { KeyDef(kind: .char, text: $0.k, label: $0.k, long: $0.long ?? []) } }
-        letters[letters.count - 1].insert(KeyDef(kind: .shift, label: "⇧", weight: 1.4), at: 0)
-        letters[letters.count - 1].append(KeyDef(kind: .backspace, label: "⌫", weight: 1.4))
+        func letterRows(_ source: [[Spec.Key]]) -> [[KeyDef]] {
+            var rows = source.map { row in row.map { KeyDef(kind: .char, text: $0.k, label: $0.k, long: $0.long ?? []) } }
+            rows[rows.count - 1].insert(KeyDef(kind: .shift, label: "⇧", weight: 1.4), at: 0)
+            rows[rows.count - 1].append(KeyDef(kind: .backspace, label: "⌫", weight: 1.4))
+            return rows + [bottomRow(symbolsMode: false)]
+        }
 
         var symbols = spec.symbols.map { row in row.map { KeyDef(kind: .char, text: $0, label: $0, long: spec.symbolsLong?[$0] ?? []) } }
         symbols[symbols.count - 1].append(KeyDef(kind: .backspace, label: "⌫", weight: 1.4))
 
         return Layout(
-            letters: letters + [bottomRow(symbolsMode: false)],
+            letters: letterRows(spec.letters),
+            lettersStandard: letterRows(spec.lettersStandard),
             symbols: symbols + [bottomRow(symbolsMode: true)],
             longPressMs: spec.longPressMs ?? 300,
-            brand: spec.topBar?.brand ?? "TrustChain"
+            compactName: spec.layoutNames.compact,
+            standardName: spec.layoutNames.standard
         )
     }
 }

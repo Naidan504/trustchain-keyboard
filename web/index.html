@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>TrustChain Keyboard</title>
-<meta name="description" content="Монгол кирилл гар: 35 үсэг, 27 том товч. Ховор үсэг удаан дарахад гарна. Android болон iPhone.">
+<meta name="description" content="Монгол кирилл гар: 35 үсэгтэй хоёр байрлал. Ховор үсэг удаан дарахад гарна. Android болон iPhone.">
 <meta name="theme-color" content="#2F6B3E">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -37,9 +37,9 @@ textarea{width:100%;min-height:110px;border-radius:12px;border:1px solid var(--l
 .actions .btn{flex:1;padding:0 8px}
 .kb{background:var(--kb);border-radius:14px;padding:4px 1px 6px;margin:0 -12px;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;position:relative}
 .row{display:flex;justify-content:center}
-.key{position:relative;flex:1 1 0;height:54px;margin:3px 2.5px;border:0;border-radius:8px;background:var(--key);color:var(--ink);font:24px/1 system-ui,-apple-system,sans-serif;box-shadow:0 1.5px 0 var(--shadow);display:flex;align-items:center;justify-content:center;padding:0;max-width:calc(10% - 5px)}
-.key.w14{flex-grow:1.4;max-width:calc(14% - 6px)}
-.key.w15{flex-grow:1.5;max-width:calc(15% - 6px)}
+.key{position:relative;flex:1 1 0;height:54px;margin:3px 2.5px;border:0;border-radius:8px;background:var(--key);color:var(--ink);font:24px/1 system-ui,-apple-system,sans-serif;box-shadow:0 1.5px 0 var(--shadow);display:flex;align-items:center;justify-content:center;padding:0;max-width:calc(8.333% - 5px)}
+.key.w14{flex-grow:1.4;max-width:calc(11.667% - 6px)}
+.key.w15{flex-grow:1.5;max-width:calc(12.5% - 6px)}
 .key.space{flex-grow:4.5;max-width:none;font-size:13px;color:var(--hint)}
 .key.special{background:var(--special);font-size:18px}
 .key.accent{background:var(--brand);color:var(--on-brand)}
@@ -59,8 +59,9 @@ footer a{color:var(--brand)}
   <header><img src="logo.svg" alt=""><a href="https://trustchain.mn">TrustChain</a></header>
 
   <h1>TrustChain Keyboard</h1>
-  <p>Монгол кирилл бичгийн гар: <b>35 үсэг, 27 том товч</b>. Бараг хэрэглэдэггүй үсгүүд холбоотой товчоо <b>удаан дарахад</b> гарна. Мэйл, мессенжер, X гээд бүх апп дээр ажиллана.</p>
-  <div class="pairs" aria-label="Удаан дарахад гарах үсгүүд"><span>г→к</span><span>ш→щ</span><span>э→е</span><span>б→п</span><span>в→ф</span><span>ь→ъ</span><span>я→ю ё</span></div>
+  <p>Монгол кирилл бичгийн гар: <b>35 үсэгтэй хоёр байрлал</b>. Компакт байрлалд ховор үсгүүд холбоотой товчоо <b>удаан дарахад</b> гарна. Мэйл, мессенжер, X гээд бүх апп дээр ажиллана.</p>
+  <div class="pairs" aria-label="Удаан дарахад гарах үсгүүд"><span>г→к</span><span>ш→щ</span><span>э→е</span><span>б→п</span><span>в→ф</span><span>ь→ъ</span></div>
+  <p>Зай товчийг удаан дарж стандарт ⇄ компакт байрлал солино.</p>
 
   <h2>Android</h2>
   <a class="btn primary big" href="trustchain-keyboard.apk" download>Android-д татах (APK, 42 KB)</a>

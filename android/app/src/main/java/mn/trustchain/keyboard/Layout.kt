@@ -17,11 +17,11 @@ data class KeyDef(
 /** Parsed spec/layout.json (bundled as assets/layout.json). */
 class Layout(
     val letters: List<List<KeyDef>>,
+    val lettersStandard: List<List<KeyDef>>,
     val symbols: List<List<KeyDef>>,
     val longPressMs: Long,
-    val brand: String,
-    val brandUrl: String,
-    val shareLabel: String,
+    val compactName: String,
+    val standardName: String,
     val shareText: String,
     val shareUrl: String,
 ) {
@@ -45,16 +45,19 @@ class Layout(
                 }
             }
 
-            val lettersJson = o.getJSONArray("letters")
-            val letters = MutableList(lettersJson.length()) { r ->
-                val row = lettersJson.getJSONArray(r)
-                MutableList(row.length()) { i ->
-                    val k = row.getJSONObject(i)
-                    KeyDef(KeyDef.Type.CHAR, text = k.getString("k"), long = strings(k.optJSONArray("long")))
+            fun letterRows(field: String): List<List<KeyDef>> {
+                val lettersJson = o.getJSONArray(field)
+                val letters = MutableList(lettersJson.length()) { r ->
+                    val row = lettersJson.getJSONArray(r)
+                    MutableList(row.length()) { i ->
+                        val k = row.getJSONObject(i)
+                        KeyDef(KeyDef.Type.CHAR, text = k.getString("k"), long = strings(k.optJSONArray("long")))
+                    }
                 }
+                letters.last().add(0, KeyDef(KeyDef.Type.SHIFT, label = "⇧", weight = 1.4f))
+                letters.last().add(KeyDef(KeyDef.Type.BACKSPACE, label = "⌫", weight = 1.4f))
+                return letters + listOf(bottomRow(false))
             }
-            letters.last().add(0, KeyDef(KeyDef.Type.SHIFT, label = "⇧", weight = 1.4f))
-            letters.last().add(KeyDef(KeyDef.Type.BACKSPACE, label = "⌫", weight = 1.4f))
 
             val symLong = o.optJSONObject("symbolsLong") ?: JSONObject()
             val symJson = o.getJSONArray("symbols")
@@ -69,13 +72,14 @@ class Layout(
 
             val top = o.optJSONObject("topBar") ?: JSONObject()
             val share = top.optJSONObject("share") ?: JSONObject()
+            val names = o.getJSONObject("layoutNames")
             return Layout(
-                letters = letters + listOf(bottomRow(false)),
+                letters = letterRows("letters"),
+                lettersStandard = letterRows("lettersStandard"),
                 symbols = symbols + listOf(bottomRow(true)),
-                longPressMs = o.optLong("longPressMs", 300),
-                brand = top.optString("brand", "TrustChain"),
-                brandUrl = top.optString("brandUrl", "https://trustchain.mn"),
-                shareLabel = share.optString("label", "Share"),
+                longPressMs = o.getLong("longPressMs"),
+                compactName = names.getString("compact"),
+                standardName = names.getString("standard"),
                 shareText = share.optString("text", ""),
                 shareUrl = share.optString("url", "https://trustchain.mn/keyboard"),
             )

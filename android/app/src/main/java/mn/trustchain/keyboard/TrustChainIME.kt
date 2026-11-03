@@ -1,9 +1,7 @@
 package mn.trustchain.keyboard
 
 import android.content.Context
-import android.content.Intent
 import android.inputmethodservice.InputMethodService
-import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.text.InputType
@@ -27,7 +25,10 @@ class TrustChainIME : InputMethodService(), KeyboardView.Listener {
         layout = Layout.parse(assets.open("layout.json").bufferedReader().use { it.readText() })
     }
 
-    override fun onCreateInputView(): View = KeyboardView(this, layout, this).also { view = it }
+    override fun onCreateInputView(): View = KeyboardView(this, layout, this).also {
+        it.standardMode = getSharedPreferences("keyboard", Context.MODE_PRIVATE).getBoolean("standardLayout", false)
+        view = it
+    }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
@@ -136,20 +137,10 @@ class TrustChainIME : InputMethodService(), KeyboardView.Listener {
         updateAutoShift()
     }
 
-    override fun onShare() {
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, "${layout.shareText} ${layout.shareUrl}")
-        }
-        val chooser = Intent.createChooser(send, layout.shareLabel).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        runCatching { startActivity(chooser) }
-        requestHideSelf(0)
-    }
-
-    override fun onBrand() {
-        runCatching {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(layout.brandUrl)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-        }
-        requestHideSelf(0)
+    override fun onLayoutToggle() {
+        val v = view ?: return
+        v.standardMode = !v.standardMode
+        getSharedPreferences("keyboard", Context.MODE_PRIVATE).edit().putBoolean("standardLayout", v.standardMode).apply()
+        lastSpaceAt = 0
     }
 }

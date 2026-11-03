@@ -12,6 +12,7 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
     override func viewDidLoad() {
         super.viewDidLoad()
         kb = KeyboardView(layout: Layout.load(withGlobe: needsInputModeSwitchKey))
+        kb.standardMode = UserDefaults.standard.bool(forKey: "standardLayout")
         kb.delegate = self
         kb.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(kb)
@@ -29,7 +30,7 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
         lastShiftTap = .distantPast
         if heightConstraint == nil {
             let rows = CGFloat(kb.rows.count)
-            let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.barH + rows * KeyboardView.rowH + 4)
+            let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.topPadding + rows * KeyboardView.rowH + 4)
             h.priority = UILayoutPriority(999)
             h.isActive = true
             heightConstraint = h
@@ -127,6 +128,12 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
     func kbSymbols(_ on: Bool) {
         kb.symbolsMode = on
         if !on { updateAutoShift() }
+    }
+
+    func kbLayoutToggle() {
+        kb.standardMode.toggle()
+        UserDefaults.standard.set(kb.standardMode, forKey: "standardLayout")
+        lastSpaceAt = .distantPast
     }
 
     func kbGlobe(from view: UIView, with event: UIEvent?) {

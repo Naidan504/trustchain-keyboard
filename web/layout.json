@@ -1,20 +1,35 @@
 {
   "name": "TrustChain Keyboard",
   "version": 1,
-  "about": "Single source of truth for every platform. Letter rows keep the order of the standard Mongolian (MNS 5217) layout so existing typists feel at home; the 8 rarest letters move to long-press on a related key. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
-  "longPressMs": 300,
+  "about": "Single source of truth for every platform. 'letters' is the compact layout and 'lettersStandard' follows the standard Mongolian (MNS 5217) layout. 'long' lists popup options in order; the first entry is preselected.",
+  "longPressMs": 250,
+  "layoutNames": { "compact": "TrustChain", "standard": "TrustChain · Стандарт" },
   "letters": [
     [
-      { "k": "ц" }, { "k": "у", "long": ["ү", "ю"] }, { "k": "ж" }, { "k": "э", "long": ["е"] }, { "k": "н" },
-      { "k": "г", "long": ["к"] }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }
+      { "k": "ц" }, { "k": "у" }, { "k": "ж" }, { "k": "э", "long": ["е"] }, { "k": "н" },
+      { "k": "г", "long": ["к"] }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }, { "k": "ю" }
     ],
     [
       { "k": "й" }, { "k": "ы" }, { "k": "б", "long": ["п"] }, { "k": "ө" }, { "k": "а" },
-      { "k": "х" }, { "k": "р" }, { "k": "о", "long": ["ө"] }, { "k": "л" }, { "k": "д" }
+      { "k": "х" }, { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }
     ],
     [
-      { "k": "я", "long": ["ю", "ё"] }, { "k": "ч" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
+      { "k": "я" }, { "k": "ч" }, { "k": "ё" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
       { "k": "т" }, { "k": "ь", "long": ["ъ"] }, { "k": "в", "long": ["ф"] }
+    ]
+  ],
+  "lettersStandard": [
+    [
+      { "k": "ф" }, { "k": "ц" }, { "k": "у" }, { "k": "ж" }, { "k": "э", "long": ["е"] }, { "k": "н" },
+      { "k": "г" }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }, { "k": "к" }, { "k": "ъ" }
+    ],
+    [
+      { "k": "й" }, { "k": "ы" }, { "k": "б" }, { "k": "ө" }, { "k": "а" }, { "k": "х" },
+      { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }, { "k": "п" }
+    ],
+    [
+      { "k": "я" }, { "k": "ч" }, { "k": "ё" }, { "k": "с" }, { "k": "м" },
+      { "k": "и" }, { "k": "т" }, { "k": "ь" }, { "k": "в" }, { "k": "ю" }
     ]
   ],
   "row3": { "left": "shift", "right": "backspace" },
