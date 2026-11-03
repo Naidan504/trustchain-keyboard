@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TrustChain Keyboard</title>
 <meta name="description" content="Монгол кирилл гар: 35 үсэг, 27 том товч. Ховор үсэг удаан дарахад гарна. Android болон iPhone.">
 <meta name="theme-color" content="#2F6B3E">
@@ -14,43 +14,44 @@
 :root{--bg:#f6f7f8;--card:#fff;--ink:#1f1f1f;--muted:#5f6368;--brand:#2F6B3E;--on-brand:#fff;--kb:#e4e7eb;--key:#fff;--key-down:#c9ced5;--special:#c4c9d0;--hint:#80868b;--shadow:rgba(0,0,0,.2);--line:#dfe2e6}
 @media (prefers-color-scheme:dark){:root{--bg:#121314;--card:#1e2022;--ink:#ededed;--muted:#9aa0a6;--brand:#a8d5ac;--on-brand:#10301a;--kb:#1b1d1f;--key:#3a3d41;--key-down:#55595e;--special:#2b2e31;--hint:#9aa0a6;--shadow:rgba(0,0,0,.5);--line:#2e3134}}
 *{box-sizing:border-box;touch-action:manipulation}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:19px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:680px;margin:0 auto;padding:0 16px calc(24px + env(safe-area-inset-bottom))}
 header{display:flex;align-items:center;gap:10px;padding:14px 0}
 header img{width:32px;height:32px}
-header a{color:var(--brand);font-weight:700;text-decoration:none;font-size:18px}
-h1{font-size:28px;line-height:1.2;margin:8px 0}
-h2{font-size:20px;margin:28px 0 8px}
+header a{color:var(--brand);font-weight:700;text-decoration:none;font-size:21px}
+h1{font-size:34px;line-height:1.2;margin:8px 0}
+h2{font-size:24px;margin:28px 0 8px}
 p{margin:8px 0}
 .muted{color:var(--muted)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
 .btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
-.big{width:100%;font-size:18px;min-height:56px}
+.big{width:100%;font-size:21px;min-height:60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
 ol{padding-left:22px;margin:8px 0}
 li{margin:4px 0}
 .pairs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.pairs span{border:1px solid var(--line);border-radius:8px;padding:2px 8px;background:var(--card);font-weight:600}
+.pairs span{border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:20px;background:var(--card);font-weight:600}
 /* demo */
-textarea{width:100%;min-height:110px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:20px/1.4 inherit;font-family:inherit;padding:12px;resize:vertical}
+textarea{width:100%;min-height:130px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:24px/1.4 inherit;font-size:24px;font-family:inherit;padding:12px;resize:vertical}
 .actions{display:flex;gap:8px;margin:8px 0}
 .actions .btn{flex:1;padding:0 8px}
 .kb{background:var(--kb);border-radius:14px;padding:4px 1px 6px;margin:0 -12px;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-touch-callout:none;position:relative}
 .row{display:flex;justify-content:center}
-.key{position:relative;flex:1 1 0;height:54px;margin:3px 2.5px;border:0;border-radius:8px;background:var(--key);color:var(--ink);font:24px/1 system-ui,-apple-system,sans-serif;box-shadow:0 1.5px 0 var(--shadow);display:flex;align-items:center;justify-content:center;padding:0;max-width:calc(10% - 5px)}
+.key{position:relative;flex:1 1 0;height:60px;margin:3px 2.5px;border:0;border-radius:8px;background:var(--key);color:var(--ink);font:28px/1 system-ui,-apple-system,sans-serif;box-shadow:0 1.5px 0 var(--shadow);display:flex;align-items:center;justify-content:center;padding:0;max-width:calc(10% - 5px)}
 .key.w14{flex-grow:1.4;max-width:calc(14% - 6px)}
 .key.w15{flex-grow:1.5;max-width:calc(15% - 6px)}
-.key.space{flex-grow:4.5;max-width:none;font-size:13px;color:var(--hint)}
-.key.special{background:var(--special);font-size:18px}
+.key.space{flex-grow:4.5;max-width:none;font-size:16px;color:var(--hint)}
+.key.special{background:var(--special);font-size:21px}
+.key.w15{font-size:18px;white-space:nowrap}
 .key.accent{background:var(--brand);color:var(--on-brand)}
 .key.down{background:var(--key-down)}
-.key small{position:absolute;top:3px;right:6px;font-size:11px;color:var(--hint)}
+.key small{position:absolute;top:3px;right:6px;font-size:13px;color:var(--hint)}
 .bubble{position:absolute;display:flex;background:var(--card);border-radius:10px;box-shadow:0 4px 14px var(--shadow);z-index:5;pointer-events:none}
-.bubble div{min-width:44px;height:56px;display:flex;align-items:center;justify-content:center;font-size:28px;border-radius:8px;margin:3px}
+.bubble div{min-width:48px;height:62px;display:flex;align-items:center;justify-content:center;font-size:32px;border-radius:8px;margin:3px}
 .bubble div.sel{background:var(--brand);color:var(--on-brand)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
-footer{margin-top:32px;font-size:14px}
+footer{margin-top:32px;font-size:16px}
 footer a{color:var(--brand)}
 </style>
 </head>
