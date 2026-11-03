@@ -13,6 +13,14 @@
 
 ## Open requests
 
+### R4: App Store settings only the web UI can set (status: open, needed for launch)
+The owner decided to launch on the **App Store** (not TestFlight). Claude sets the description, screenshots, categories, age rating and review contact via the API. Please do these in App Store Connect → app **"TrustChain Keyboard" (Apple ID 6830161190)**:
+1. **App Privacy** → Get Started → "Do you or your third-party partners collect data from this app?" → **No, we do not collect data from this app** → Publish. Privacy Policy URL: https://trustchain.mn/keyboard/privacy.html
+2. **Pricing and Availability** → Price: **Free (USD 0)**. Availability: **all countries/regions**.
+3. **App Information** → Content Rights: **"No, it does not contain, show, or access third-party content."** If asked about **encryption**: the app uses none (ITSAppUsesNonExemptEncryption = false is already in the build).
+4. **Don't press "Submit for Review"**: Claude submits via the API after checking everything. Answer here when 1–3 are done (or blocked, with the reason).
+
+
 ### R3: new App Store Connect app with the new bundle ID (status: done; build 41 uploaded and works on the iPhone)
 Why: iOS never lists a keyboard whose bundle ID starts with `mn.`. We must ship under `com.trustchainmn.keyboard`. An app record's bundle ID can't be changed, and the API can't create apps.
 1. developer.apple.com → Certificates, Identifiers & Profiles → Identifiers: make sure **`com.trustchainmn.keyboard`** and **`com.trustchainmn.keyboard.ext`** exist as explicit App IDs (create them if missing, with no capabilities; descriptions "TrustChain Keyboard" / "TrustChain Keyboard Extension").
