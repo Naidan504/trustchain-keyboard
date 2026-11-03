@@ -55,7 +55,9 @@ if (cmd === 'create-cert') {
     let prof;
     for (const p of (await api('GET', `/v1/profiles?filter[name]=${encodeURIComponent(t.profile)}&limit=10`)).data) {
       const certs = (await api('GET', `/v1/profiles/${p.id}/certificates?limit=20`)).data.map(c => c.id);
-      if (!prof && p.attributes.profileState === 'ACTIVE' && certs.includes(certId)) prof = p;
+      const pBundle = (await api('GET', `/v1/profiles/${p.id}/bundleId`)).data;
+      const sameApp = pBundle?.attributes?.identifier === t.id; // bundle IDs changed once (mn.* → com.trustchainmn.*)
+      if (!prof && sameApp && p.attributes.profileState === 'ACTIVE' && certs.includes(certId)) prof = p;
       else await api('DELETE', `/v1/profiles/${p.id}`);
     }
     if (!prof) {
