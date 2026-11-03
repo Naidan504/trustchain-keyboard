@@ -25,13 +25,18 @@ function token() {
   return `${head}.${body}.${sig.toString('base64url')}`;
 }
 
-async function api(method, p, body) {
+async function api(method, p, body, attempt = 1) {
   const res = await fetch(`https://api.appstoreconnect.apple.com${p}`, {
     method, headers: { authorization: `Bearer ${token()}`, 'content-type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
   const text = await res.text();
   const json = text ? JSON.parse(text) : {};
+  if (res.status >= 500 && attempt < 5) { // Apple's API has transient 5xx errors
+    console.log(`${method} ${p.split('?')[0]} → ${res.status}, retrying (${attempt})`);
+    await new Promise(r => setTimeout(r, 15000 * attempt));
+    return api(method, p, body, attempt + 1);
+  }
   if (!res.ok) throw new Error(`${method} ${p.split('?')[0]} → ${res.status}: ${(json.errors || []).map(e => e.detail || e.title).join('; ')}`);
   return json;
 }
