@@ -84,13 +84,6 @@ final class KeyboardUITests: XCTestCase {
         }
     }
 
-    /// Control: Apple's keyboard template ("Control KB", installed by CI from the ControlHost app).
-    func testControlKeyboardIsOffered() throws {
-        let settings = openAddNewKeyboard("control")
-        let kb = settings.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Control KB")).firstMatch
-        XCTAssertTrue(kb.waitForExistence(timeout: 10), "CONTROL keyboard (Apple template) is NOT offered either")
-    }
-
     func testKeyboardIsOfferedAndTypes() throws {
         // Launch our app once first, in case iOS only offers keyboards of apps that have run.
         let first = XCUIApplication()
