@@ -137,4 +137,84 @@ final class KeyboardUITests: XCTestCase {
         shot("4-typed", app)
         XCTAssertEqual(field.value as? String, "Алдп")
     }
+
+    func testAppStoreScreenshots() throws {
+        // Launch once so iOS registers the extension before opening Settings.
+        let first = XCUIApplication()
+        first.launch()
+        sleep(2)
+        first.terminate()
+
+        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+        settings.terminate()
+        settings.launch()
+        tapText(settings, "General")
+        tapText(settings, "Keyboard")
+        tapText(settings, "Keyboards")
+        let installed = settings.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
+        if !installed.exists {
+            tapText(settings, "Add New Keyboard")
+            let offered = settings.descendants(matching: .any)
+                .matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
+            XCTAssertTrue(offered.waitForExistence(timeout: 10), "TrustChain Keyboard is not offered")
+            offered.tap()
+            sleep(2)
+        }
+
+        let app = XCUIApplication()
+        app.launch()
+        let field = app.textViews["test-field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        field.tap()
+        sleep(2)
+        let keyboard = app.descendants(matching: .any)["trustchain-keyboard"]
+        var tries = 0
+        while !keyboard.exists && tries < 6 {
+            let globe = app.buttons.matching(NSPredicate(format: "label == 'Next keyboard' OR identifier == 'Next keyboard'")).firstMatch
+            XCTAssertTrue(globe.exists, "No keyboard switch key")
+            globe.tap()
+            sleep(1)
+            tries += 1
+        }
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
+
+        let frame = keyboard.frame
+        func key(_ row: Int, _ index: Int, _ count: CGFloat = 10) -> XCUICoordinate {
+            let unit = frame.width / 10
+            let left = (frame.width - unit * count) / 2
+            return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(
+                CGVector(dx: left + unit * (CGFloat(index) + 0.5), dy: 8 + 54 * (CGFloat(row) + 0.5)))
+        }
+        let space = keyboard.coordinate(withNormalizedOffset: .zero).withOffset(
+            CGVector(dx: frame.width / 2, dy: 8 + 54 * 3.5))
+        // Tap Сайн байна уу; the first letter is capitalized by the keyboard.
+        for (row, index) in [(2, 3), (1, 3), (2, 4), (0, 4)] { key(row, index, row == 1 ? 9 : 10).tap() }
+        space.tap()
+        for (row, index) in [(1, 1), (1, 3), (2, 4), (0, 4), (1, 3)] { key(row, index, row == 1 ? 9 : 10).tap() }
+        space.tap()
+        key(0, 1).tap(); key(0, 1).tap()
+        XCTAssertEqual(field.value as? String, "Сайн байна уу")
+        shot("appstore-1-typing", app)
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.textViews["test-field"].waitForExistence(timeout: 10))
+        shot("appstore-2-setup", app)
+
+        let longerField = app.textViews["test-field"]
+        longerField.tap()
+        tries = 0
+        while !keyboard.exists && tries < 6 {
+            let globe = app.buttons.matching(NSPredicate(format: "label == 'Next keyboard' OR identifier == 'Next keyboard'")).firstMatch
+            XCTAssertTrue(globe.exists, "No keyboard switch key")
+            globe.tap()
+            sleep(1)
+            tries += 1
+        }
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
+        longerField.typeText("Монгол кирилл бичгийн шинэ гар. Том товчтой, ховор үсэг нь удаан дарахад гарна.")
+        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        shot("appstore-3-keyboard", app)
+    }
 }

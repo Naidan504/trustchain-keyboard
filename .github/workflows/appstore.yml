@@ -1,0 +1,124 @@
+name: App Store submission
+
+on:
+  workflow_dispatch:
+    inputs:
+      build:
+        description: Processed TestFlight build number (for example 51)
+        required: true
+        type: string
+      submit:
+        description: Submit the prepared version for App Review
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  screenshots:
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use the newest Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          test -n "$X" || { echo "no Xcode 26 on this runner"; exit 1; }
+          sudo xcode-select -s "$X"; xcodebuild -version
+      - run: brew install xcodegen
+      - run: node tools/sync-spec.mjs
+      - working-directory: ios
+        run: xcodegen
+      - name: Capture App Store screenshots
+        working-directory: ios
+        run: |
+          set -euo pipefail
+          DEV=$(xcrun simctl list devices available | grep -m1 -oE 'iPhone 1[5-7] Pro Max[^\(]*\(([0-9A-F-]{36})\)' | grep -oE '[0-9A-F-]{36}')
+          test -n "$DEV" || { echo "No iPhone Pro Max simulator"; exit 1; }
+          mkdir -p build
+          xcrun simctl shutdown "$DEV" 2>/dev/null || true
+          xcrun simctl erase "$DEV"
+          xcrun simctl boot "$DEV"
+          xcrun simctl bootstatus "$DEV" -b
+          xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
+            -destination "id=$DEV" -resultBundlePath build/appstore.xcresult \
+            -only-testing:UITests/KeyboardUITests/testAppStoreScreenshots \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
+            > build/appstore-test.log 2>&1 || { tail -n 100 build/appstore-test.log; exit 1; }
+          xcrun xcresulttool export attachments --path build/appstore.xcresult --output-path build/attachments
+      - name: Select and verify screenshots
+        working-directory: ios
+        run: |
+          set -euo pipefail
+          mkdir -p build/appstore-shots
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          import shutil
+
+          root = Path('build/attachments')
+          out = Path('build/appstore-shots')
+          expected = {f'appstore-{i}-{suffix}' for i, suffix in [(1, 'typing'), (2, 'setup'), (3, 'keyboard')]}
+          found = {}
+          for manifest in root.rglob('*.json'):
+              data = json.loads(manifest.read_text())
+              def visit(value):
+                  if isinstance(value, dict):
+                      name = value.get('suggestedHumanReadableName') or value.get('name')
+                      file = value.get('exportedFileName') or value.get('fileName')
+                      if name in expected and file:
+                          path = manifest.parent / file
+                          if path.is_file() and path.suffix.lower() == '.png':
+                              found[name] = path
+                      for child in value.values():
+                          visit(child)
+                  elif isinstance(value, list):
+                      for child in value:
+                          visit(child)
+              visit(data)
+          for path in root.rglob('appstore-*.png'):
+              for name in expected:
+                  if path.stem == name or path.stem.startswith(name + '_'):
+                      found.setdefault(name, path)
+          if set(found) != expected:
+              raise SystemExit(f'Missing screenshots: {sorted(expected - set(found))}; found {sorted(found)}')
+          for name, path in found.items():
+              shutil.copyfile(path, out / f'{name}.png')
+          PY
+          for image in build/appstore-shots/*.png; do
+            dims=$(sips -g pixelWidth -g pixelHeight "$image")
+            echo "$dims"
+            width=$(echo "$dims" | awk '/pixelWidth:/ {print $2}')
+            height=$(echo "$dims" | awk '/pixelHeight:/ {print $2}')
+            case "$width:$height" in
+              1290:2796|1320:2868) ;;
+              *) echo "Unexpected screenshot size: $image ($width x $height)"; exit 1 ;;
+            esac
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appstore-screenshots
+          path: ios/build/appstore-shots/*.png
+          if-no-files-found: error
+
+  metadata:
+    needs: screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: appstore-screenshots
+          path: appstore-shots
+      - name: Prepare App Store version
+        run: node tools/asc-appstore.mjs
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          BUILD: ${{ inputs.build }}
+          SUBMIT: ${{ inputs.submit }}
+          SHOTS_DIR: appstore-shots
