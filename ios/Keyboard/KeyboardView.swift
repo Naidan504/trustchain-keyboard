@@ -24,7 +24,8 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     var enableInputClicksWhenVisible: Bool { true }
 
     static let barH: CGFloat = 8 // top margin only; the brand bar was removed (C1)
-    static let rowH: CGFloat = 54
+    // Same total height as Apple's keyboard, so nothing jumps when switching: 216pt, or 226pt on Plus/Max phones.
+    static let rowH: CGFloat = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) >= 428 ? 54.5 : 52
     private let gap: CGFloat = 3
     private let radius: CGFloat = 7
 

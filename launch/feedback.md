@@ -25,6 +25,10 @@ Owner: "revert the keyboards, it's become way harder to type; iterate small from
 - **ё no longer looks missing, ю no longer duplicated:** я→ё only, у→ю only. Cause: the corner hint shows only the first long-press letter, so ё was invisible behind ю.
 - Owner to try: keep or roll back.
 
+## Step 3 (2026-11-06): iOS keyboard height
+- Owner: the keyboard is slightly taller than Apple's, so it jumps when switching; the extra height doesn't help. **Rows 54 → 52pt (216pt total), or 54.5pt (226pt) on Plus/Max phones.**
+- Owner to try: keep or roll back.
+
 ## Ideas for later
 - **Slide/swipe to type** in Cyrillic (the owner has always wanted it). Needs a Mongolian word list; `spec/wordfreq.json` already has the top 50k words.
 - Typing-test finding to check: **ъ** is common in casual "let's" forms (авъя, ярилцъя, алхъя, даръя, оръё), so maybe it shouldn't be hidden behind Ь.
