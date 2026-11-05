@@ -128,11 +128,11 @@ final class KeyboardUITests: XCTestCase {
             let y = 8 + 54 * (CGFloat(row) + 0.5)
             return ourKeyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: y))
         }
-        // Row 2 (index 1): й б ө а х р о л д (9 keys, centred)
-        key(row: 1, index: 3, keysInRow: 9).tap()   // а → "А" (auto-capital at the start)
-        key(row: 1, index: 7, keysInRow: 9).tap()   // л
-        key(row: 1, index: 8, keysInRow: 9).tap()   // д
-        key(row: 1, index: 1, keysInRow: 9).press(forDuration: 0.8) // hold б → popup, first option п, release types it
+        // Row 2 (index 1): й ы б ө а х р о л д (10 keys)
+        key(row: 1, index: 4, keysInRow: 10).tap()   // а → "А" (auto-capital at the start)
+        key(row: 1, index: 8, keysInRow: 10).tap()   // л
+        key(row: 1, index: 9, keysInRow: 10).tap()   // д
+        key(row: 1, index: 2, keysInRow: 10).press(forDuration: 0.8) // hold б → popup, first option п, release types it
         sleep(1)
         shot("4-typed", app)
         XCTAssertEqual(field.value as? String, "Алдп")
