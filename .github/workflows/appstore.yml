@@ -75,10 +75,12 @@ jobs:
                   if isinstance(value, dict):
                       name = value.get('suggestedHumanReadableName') or value.get('name')
                       file = value.get('exportedFileName') or value.get('fileName')
-                      if name in expected and file:
+                      # Xcode names attachments like "appstore-1-typing_0_<UUID>.png".
+                      match = next((e for e in expected if isinstance(name, str) and (name == e or name.startswith(e + '_'))), None)
+                      if match and file:
                           path = manifest.parent / file
                           if path.is_file() and path.suffix.lower() == '.png':
-                              found[name] = path
+                              found[match] = path
                       for child in value.values():
                           visit(child)
                   elif isinstance(value, list):
