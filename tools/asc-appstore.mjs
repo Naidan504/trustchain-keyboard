@@ -21,7 +21,7 @@ const description = `TrustChain Keyboard is a Mongolian Cyrillic keyboard for iP
 
 Mongolian has 35 letters, so the standard keyboard crams 12 small keys into each row. TrustChain Keyboard shows the 27 letters you use most as big keys, in the familiar Mongolian order. The rarely used letters are one long-press away:
 • Г → К   • Ш → Щ   • Э → Е   • Б → П
-• В → Ф   • Ь → Ъ   • Я → Ю, Ё   • У → Ю
+• В → Ф   • Ь → Ъ   • Я → Ё   • У → Ю
 
 Hold a key, slide to the letter, release. That's it.
 

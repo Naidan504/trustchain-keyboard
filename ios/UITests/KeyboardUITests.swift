@@ -180,20 +180,25 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
 
         let frame = keyboard.frame
-        func key(_ row: Int, _ index: Int, _ count: CGFloat = 10) -> XCUICoordinate {
-            let unit = frame.width / 10
-            let left = (frame.width - unit * count) / 2
-            return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(
-                CGVector(dx: left + unit * (CGFloat(index) + 0.5), dy: 8 + 54 * (CGFloat(row) + 0.5)))
+        // Mirrors KeyboardView: row 0 has 9 centred keys, row 1 has 10, row 2 is shift (1.4) + 8 letters + backspace (1.4).
+        func key(_ row: Int, _ index: Int) -> XCUICoordinate {
+            let x: CGFloat
+            switch row {
+            case 0: x = frame.width / 10 * (0.5 + CGFloat(index) + 0.5)
+            case 1: x = frame.width / 10 * (CGFloat(index) + 0.5)
+            default: x = frame.width / 10.8 * (1.4 + CGFloat(index) + 0.5)
+            }
+            return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: 8 + 54 * (CGFloat(row) + 0.5)))
         }
         let space = keyboard.coordinate(withNormalizedOffset: .zero).withOffset(
             CGVector(dx: frame.width / 2, dy: 8 + 54 * 3.5))
+        let (s, a, y, n, b, u) = ((2, 2), (1, 4), (1, 0), (0, 4), (1, 2), (0, 1)) // с а й н б у
         // Tap Сайн байна уу; the first letter is capitalized by the keyboard.
-        for (row, index) in [(2, 3), (1, 3), (2, 4), (0, 4)] { key(row, index, row == 1 ? 9 : 10).tap() }
+        for (row, index) in [s, a, y, n] { key(row, index).tap() }
         space.tap()
-        for (row, index) in [(1, 1), (1, 3), (2, 4), (0, 4), (1, 3)] { key(row, index, row == 1 ? 9 : 10).tap() }
+        for (row, index) in [b, a, y, n, a] { key(row, index).tap() }
         space.tap()
-        key(0, 1).tap(); key(0, 1).tap()
+        for (row, index) in [u, u] { key(row, index).tap() }
         XCTAssertEqual(field.value as? String, "Сайн байна уу")
         shot("appstore-1-typing", app)
 
