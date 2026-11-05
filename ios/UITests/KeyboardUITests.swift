@@ -153,10 +153,14 @@ final class KeyboardUITests: XCTestCase {
         sleep(2)
         shot("shots-after-add", settings)
 
+        // Close Settings first so the app doesn't show a "◀ Settings" back link in the screenshots.
+        settings.terminate()
         let app = XCUIApplication()
         app.launch()
         let field = app.textViews["test-field"]
         XCTAssertTrue(field.waitForExistence(timeout: 10))
+        sleep(1)
+        shot("appstore-2-setup", app)
         field.tap()
         sleep(2)
         let keyboard = app.descendants(matching: .any)["trustchain-keyboard"]
@@ -194,24 +198,13 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertEqual(field.value as? String, "Сайн байна уу")
         shot("appstore-1-typing", app)
 
-        app.terminate()
-        app.launch()
-        XCTAssertTrue(app.textViews["test-field"].waitForExistence(timeout: 10))
-        shot("appstore-2-setup", app)
-
-        let longerField = app.textViews["test-field"]
-        longerField.tap()
-        tries = 0
-        while !keyboard.exists && tries < 6 {
-            let globe = app.buttons.matching(NSPredicate(format: "label == 'Next keyboard' OR identifier == 'Next keyboard'")).firstMatch
-            XCTAssertTrue(globe.exists, "No keyboard switch key")
-            globe.tap()
-            sleep(1)
-            tries += 1
-        }
-        XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
-        longerField.typeText("Монгол кирилл бичгийн шинэ гар. Том товчтой, ховор үсэг нь удаан дарахад гарна.")
-        XCTAssertTrue(keyboard.waitForExistence(timeout: 5))
+        // Keep typing in the same session: " монгол гар"
+        let (m, o, g, l, r) = ((2, 3), (1, 6), (0, 5), (1, 7), (1, 5)) // м о г л р
+        space.tap()
+        for (row, index) in [m, o, n, g, o, l] { key(row, index).tap() }
+        space.tap()
+        for (row, index) in [g, a, r] { key(row, index).tap() }
+        sleep(1)
         shot("appstore-3-keyboard", app)
     }
 }

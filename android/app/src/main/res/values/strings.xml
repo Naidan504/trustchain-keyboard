@@ -4,7 +4,7 @@
     <string name="ime_name">TrustChain Keyboard</string>
     <string name="subtype_mn">Монгол (кирилл)</string>
     <string name="title">TrustChain Keyboard</string>
-    <string name="lead">35 үсэг, 27 том товч. Ховор үсгүүд (е к щ п ю ё ъ ф) холбоотой товчоо удаан дарахад гарна: г→к, ш→щ, э→е, б→п, в→ф, ь→ъ, я→ю ё.</string>
+    <string name="lead">35 үсэг, 27 том товч. Ховор үсгүүд (е к щ п ю ё ъ ф) холбоотой товчоо удаан дарахад гарна: г→к, ш→щ, э→е, б→п, в→ф, ь→ъ, я→ё, у→ю.</string>
     <string name="step1">1. Гарыг идэвхжүүлэх</string>
     <string name="step1_done">1. Идэвхжсэн ✓</string>
     <string name="step2">2. TrustChain Keyboard-ыг сонгох</string>
