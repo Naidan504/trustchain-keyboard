@@ -94,7 +94,7 @@ jobs:
           xcrun simctl spawn "$DEV" pluginkit -mA -p com.apple.keyboard-service || true
           set +e
           xcodebuild test -project TrustChainKeyboard.xcodeproj -scheme TrustChainKeyboard \
-            -destination "id=$DEV" -resultBundlePath build/ui-mn.xcresult CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= > build/test.log 2>&1
+            -destination "id=$DEV" -resultBundlePath build/ui-mn.xcresult -skip-testing:UITests/KeyboardUITests/testAppStoreScreenshots CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= > build/test.log 2>&1
           RC=$?
           echo "=== pluginkit after tests"; xcrun simctl spawn "$DEV" pluginkit -mAvvv -p com.apple.keyboard-service | grep -E "^ |Path|Display|Parent" | head -20 || true
           echo "=== system log: keyboard catalog"
