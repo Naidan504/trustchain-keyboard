@@ -32,6 +32,14 @@ test('every rare (long-press only) letter is in 1 or 2 popups, never more', () =
   for (const c of rare) { const n = long.filter(x => x === c).length; assert.ok(n >= 1 && n <= 2, `${c} popup count ${n}`); }
 });
 
+test('every rare letter is the first option on some key, so its corner hint is visible', () => {
+  const rare = ALPHABET.filter(c => !base.includes(c));
+  for (const c of rare) {
+    const hasFirst = layout.letters.flat().some(k => (k.long || [])[0] === c);
+    assert.ok(hasFirst, `no key shows ${c} as first long-press`);
+  }
+});
+
 test('symbols layer has digits 0-9', () => {
   const s = layout.symbols.flat();
   for (const d of '0123456789') assert.ok(s.includes(d));

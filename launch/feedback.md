@@ -20,6 +20,11 @@ Owner: "revert the keyboards, it's become way harder to type; iterate small from
 - **C2 done**: no у→ү / о→ө long-press.
 - Owner to try: keep or roll back. Optional short retest (T1a + T5).
 
+## Step 2 (2026-11-05): Android 1.0.6, next iOS build
+- Owner: ы on the top row is too hard to unlearn, though the narrowing rows looked nice. **ы is back in its standard place** (`ц у ж э н г ш ү з` / `й ы б ө а х р о л д`); rows are 9/10/8 again.
+- **ё no longer looks missing, ю no longer duplicated:** я→ё only, у→ю only. Cause: the corner hint shows only the first long-press letter, so ё was invisible behind ю.
+- Owner to try: keep or roll back.
+
 ## Ideas for later
 - **Slide/swipe to type** in Cyrillic (the owner has always wanted it). Needs a Mongolian word list; `spec/wordfreq.json` already has the top 50k words.
 - Typing-test finding to check: **ъ** is common in casual "let's" forms (авъя, ярилцъя, алхъя, даръя, оръё), so maybe it shouldn't be hidden behind Ь.
