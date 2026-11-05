@@ -202,12 +202,13 @@ final class KeyboardUITests: XCTestCase {
         shot("appstore-1-typing", app)
 
         // Keep typing in the same session: " монгол гар"
-        let (m, o, g, l, r) = ((2, 3), (1, 6), (0, 5), (1, 7), (1, 5)) // м о г л р
+        let (m, o, g, l, r) = ((2, 3), (1, 7), (0, 5), (1, 8), (1, 6)) // м о г л р
         space.tap()
         for (row, index) in [m, o, n, g, o, l] { key(row, index).tap() }
         space.tap()
         for (row, index) in [g, a, r] { key(row, index).tap() }
         sleep(1)
+        XCTAssertEqual(field.value as? String, "Сайн байна уу монгол гар")
         shot("appstore-3-keyboard", app)
     }
 }

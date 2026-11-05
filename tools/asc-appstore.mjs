@@ -205,11 +205,11 @@ async function main() {
   console.log('App info: subtitle, privacy URL and categories updated');
 
   const rating = (await api('GET', `/v1/appInfos/${info.id}/ageRatingDeclaration`)).data;
-  const none = ['alcoholTobaccoOrDrugUseOrReferences', 'contests', 'gambling', 'gamblingSimulated',
+  const none = ['alcoholTobaccoOrDrugUseOrReferences', 'contests', 'gamblingSimulated', 'gunsOrOtherWeapons',
     'horrorOrFearThemes', 'matureOrSuggestiveThemes', 'medicalOrTreatmentInformation',
     'profanityOrCrudeHumor', 'sexualContentGraphicAndNudity', 'sexualContentOrNudity',
     'violenceCartoonOrFantasy', 'violenceRealistic', 'violenceRealisticProlongedGraphicOrSadistic'];
-  const falseFields = ['unrestrictedWebAccess', 'messagingAndChat', 'userGeneratedContent',
+  const falseFields = ['gambling', 'healthOrWellnessTopics', 'unrestrictedWebAccess', 'messagingAndChat', 'userGeneratedContent',
     'advertising', 'lootBox', 'parentalControls', 'ageAssurance'];
   const values = {};
   for (const key of none) if (key in rating.attributes) values[key] = typeof rating.attributes[key] === 'boolean' ? false : 'NONE';
