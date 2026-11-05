@@ -134,16 +134,27 @@ async function uploadScreenshot(setId, file) {
   await api('PATCH', `/v1/appScreenshots/${created.id}`, request('appScreenshots',
     { uploaded: true, sourceFileChecksum: checksum }, undefined, created.id));
   console.log(`Screenshot ${name}: uploaded`);
-  for (let attempt = 0; attempt < 60; attempt++) {
-    const current = (await api('GET', `/v1/appScreenshots/${created.id}`)).data;
-    const state = current.attributes.assetDeliveryState?.state;
-    if (state === 'COMPLETE') return;
-    if (['FAILED', 'ERROR'].includes(state)) {
-      throw new Error(`Screenshot ${name}: asset delivery ${state}: ${JSON.stringify(current.attributes.assetDeliveryState?.errors || [])}`);
+  return { id: created.id, name };
+}
+
+// Apple processes screenshots after the upload; wait for all of them and log each state change.
+async function waitForScreenshots(uploaded) {
+  const last = {};
+  for (let attempt = 0; attempt < 80; attempt++) {
+    let pending = 0;
+    for (const { id, name } of uploaded) {
+      const delivery = (await api('GET', `/v1/appScreenshots/${id}`)).data.attributes.assetDeliveryState;
+      if (delivery?.state !== last[id]) { console.log(`Screenshot ${name}: ${delivery?.state}`); last[id] = delivery?.state; }
+      if (['FAILED', 'ERROR'].includes(delivery?.state)) {
+        throw new Error(`Screenshot ${name}: asset delivery ${delivery.state}: ${JSON.stringify(delivery.errors || [])}`);
+      }
+      if (delivery?.state !== 'COMPLETE') pending++;
     }
-    await pause(10_000);
+    if (!pending) { console.log('Screenshots: all COMPLETE'); return true; }
+    await pause(15_000);
   }
-  throw new Error(`Screenshot ${name}: asset delivery did not complete within 10 minutes`);
+  console.log(`Screenshots: still processing after 20 minutes: ${JSON.stringify(last)}`);
+  return false;
 }
 
 async function main() {
@@ -262,7 +273,10 @@ async function main() {
   const existing = await all(`/v1/appScreenshotSets/${set.id}/appScreenshots?limit=200`);
   for (const screenshot of existing) await api('DELETE', `/v1/appScreenshots/${screenshot.id}`);
   console.log(`iPhone 6.7-inch screenshot set: removed ${existing.length} old screenshot(s)`);
-  for (const name of shots) await uploadScreenshot(set.id, path.join(SHOTS_DIR, name));
+  const uploaded = [];
+  for (const name of shots) uploaded.push(await uploadScreenshot(set.id, path.join(SHOTS_DIR, name)));
+  const shotsReady = await waitForScreenshots(uploaded);
+  if (SUBMIT === 'true' && !shotsReady) throw new Error('Not submitting: screenshots are still processing');
 
   if (SUBMIT === 'true') {
     const submissions = await all(`/v1/reviewSubmissions?filter[app]=${app.id}&limit=200`);
