@@ -165,7 +165,10 @@ final class KeyboardUITests: XCTestCase {
         sleep(2)
         let keyboard = app.descendants(matching: .any)["trustchain-keyboard"]
         var tries = 0
-        while !keyboard.exists && tries < 6 {
+        while !keyboard.exists && tries < 8 {
+            // iOS may cover the keyboard with its first-run "slide to type" card.
+            let cont = app.buttons["Continue"]
+            if cont.exists { cont.tap(); sleep(1); continue }
             let globe = app.buttons.matching(NSPredicate(format: "label == 'Next keyboard' OR identifier == 'Next keyboard'")).firstMatch
             XCTAssertTrue(globe.exists, "No keyboard switch key")
             globe.tap()
