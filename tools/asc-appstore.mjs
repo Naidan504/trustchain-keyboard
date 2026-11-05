@@ -215,7 +215,19 @@ async function main() {
   for (const key of none) if (key in rating.attributes) values[key] = typeof rating.attributes[key] === 'boolean' ? false : 'NONE';
   for (const key of falseFields) if (key in rating.attributes) values[key] = typeof rating.attributes[key] === 'string' ? 'NONE' : false;
   if (!Object.keys(values).length) throw new Error('No editable age rating descriptors returned by Apple');
-  await api('PATCH', `/v1/ageRatingDeclarations/${rating.id}`, request('ageRatingDeclarations', values, undefined, rating.id));
+  values.socialMedia = false;
+  // Apple adds new required questions over time; this keyboard has none of that content, so answer "no" and log it.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await api('PATCH', `/v1/ageRatingDeclarations/${rating.id}`, request('ageRatingDeclarations', values, undefined, rating.id));
+      break;
+    } catch (error) {
+      const field = String(error.message).match(/value for the attribute '(\w+)'/)?.[1];
+      if (!field || field in values || attempt >= 8) throw error;
+      console.log(`Age rating: Apple also requires '${field}'; answering false`);
+      values[field] = false;
+    }
+  }
   console.log(`Age rating: ${Object.keys(values).length} content descriptors cleared`);
 
   let review;
