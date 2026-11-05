@@ -29,7 +29,7 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
         lastShiftTap = .distantPast
         if heightConstraint == nil {
             let rows = CGFloat(kb.rows.count)
-            let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.barH + rows * KeyboardView.rowH + 4)
+            let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.barH + rows * KeyboardView.rowH)
             h.priority = UILayoutPriority(999)
             h.isActive = true
             heightConstraint = h
