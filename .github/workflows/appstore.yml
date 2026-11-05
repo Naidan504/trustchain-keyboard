@@ -45,6 +45,16 @@ jobs:
             CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER= \
             > build/appstore-test.log 2>&1 || { tail -n 100 build/appstore-test.log; exit 1; }
           xcrun xcresulttool export attachments --path build/appstore.xcresult --output-path build/attachments
+      - name: Keep test screenshots when the test fails
+        if: failure()
+        working-directory: ios
+        run: xcrun xcresulttool export attachments --path build/appstore.xcresult --output-path build/attachments || true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failed-test-shots
+          path: ios/build/attachments
+          if-no-files-found: ignore
       - name: Select and verify screenshots
         working-directory: ios
         run: |

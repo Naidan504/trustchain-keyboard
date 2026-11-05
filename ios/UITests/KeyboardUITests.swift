@@ -145,22 +145,13 @@ final class KeyboardUITests: XCTestCase {
         sleep(2)
         first.terminate()
 
-        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
-        settings.terminate()
-        settings.launch()
-        tapText(settings, "General")
-        tapText(settings, "Keyboard")
-        tapText(settings, "Keyboards")
-        let installed = settings.descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
-        if !installed.exists {
-            tapText(settings, "Add New Keyboard")
-            let offered = settings.descendants(matching: .any)
-                .matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
-            XCTAssertTrue(offered.waitForExistence(timeout: 10), "TrustChain Keyboard is not offered")
-            offered.tap()
-            sleep(2)
-        }
+        // Same path as testKeyboardIsOfferedAndTypes, which is known to work.
+        let settings = openAddNewKeyboard("shots")
+        let offered = settings.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "TrustChain Keyboard")).firstMatch
+        XCTAssertTrue(offered.waitForExistence(timeout: 10), "TrustChain Keyboard is not offered")
+        offered.tap()
+        sleep(2)
+        shot("shots-after-add", settings)
 
         let app = XCUIApplication()
         app.launch()
@@ -176,6 +167,7 @@ final class KeyboardUITests: XCTestCase {
             globe.tap()
             sleep(1)
             tries += 1
+            shot("shots-switch-\(tries)", app)
         }
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
 
