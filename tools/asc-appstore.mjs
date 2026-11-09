@@ -287,7 +287,7 @@ async function main() {
         { platform: 'IOS' }, { app: { data: ref('apps', app.id) } }))).data;
       console.log(`Review submission: created ${submission.id}`);
     }
-    const items = await all(`/v1/reviewSubmissions/${submission.id}/reviewSubmissionItems?limit=200`);
+    const items = await all(`/v1/reviewSubmissions/${submission.id}/items?include=appStoreVersion&limit=200`);
     if (!items.some(item => item.relationships?.appStoreVersion?.data?.id === version.id)) {
       await api('POST', '/v1/reviewSubmissionItems', request('reviewSubmissionItems', { type: 'APP_STORE_VERSION' },
         { reviewSubmission: { data: ref('reviewSubmissions', submission.id) },
