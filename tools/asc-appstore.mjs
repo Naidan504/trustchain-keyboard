@@ -78,7 +78,9 @@ async function api(method, endpoint, body, attempt = 1) {
   }
   if (!response.ok) {
     const errors = (json.errors || []).map(error =>
-      [error.code, error.title, error.detail, error.source?.pointer].filter(Boolean).join(' — '));
+      [error.code, error.title, error.detail, error.source?.pointer,
+        // Apple puts the real reasons (missing fields, etc.) in meta.associatedErrors.
+        error.meta?.associatedErrors && JSON.stringify(error.meta.associatedErrors)].filter(Boolean).join(' — '));
     const message = errors.length ? errors.join('; ') : raw.slice(0, 500);
     const exception = new Error(`${method} ${endpoint.split('?')[0]}: HTTP ${response.status}: ${message}`);
     exception.status = response.status;
