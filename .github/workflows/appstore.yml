@@ -12,9 +12,15 @@ on:
         required: false
         type: boolean
         default: false
+      keep_screenshots:
+        description: Reuse the screenshots already in App Store Connect (skips the simulator)
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   screenshots:
+    if: ${{ !inputs.keep_screenshots }}
     runs-on: macos-26
     timeout-minutes: 60
     steps:
@@ -114,6 +120,7 @@ jobs:
 
   metadata:
     needs: screenshots
+    if: ${{ always() && (needs.screenshots.result == 'success' || inputs.keep_screenshots) }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -122,6 +129,7 @@ jobs:
         with:
           node-version: 22
       - uses: actions/download-artifact@v4
+        if: ${{ !inputs.keep_screenshots }}
         with:
           name: appstore-screenshots
           path: appstore-shots
@@ -133,4 +141,4 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           BUILD: ${{ inputs.build }}
           SUBMIT: ${{ inputs.submit }}
-          SHOTS_DIR: appstore-shots
+          SHOTS_DIR: ${{ inputs.keep_screenshots && 'keep' || 'appstore-shots' }}

@@ -158,7 +158,9 @@ async function waitForScreenshots(uploaded) {
 }
 
 async function main() {
-  const shots = (await fs.readdir(SHOTS_DIR)).filter(name => /^appstore-[123]-(typing|setup|keyboard)\.png$/.test(name)).sort();
+  // SHOTS_DIR=keep reuses the screenshots already in App Store Connect (quick resubmit).
+  const keepShots = SHOTS_DIR === 'keep';
+  const shots = keepShots ? ['appstore-1', 'appstore-2', 'appstore-3'] : (await fs.readdir(SHOTS_DIR)).filter(name => /^appstore-[123]-(typing|setup|keyboard)\.png$/.test(name)).sort();
   if (shots.length !== 3 || new Set(shots.map(name => name.slice(0, 10))).size !== 3) {
     throw new Error(`Expected three appstore-* PNGs in ${SHOTS_DIR}; found ${shots.join(', ')}`);
   }
@@ -271,10 +273,15 @@ async function main() {
       { appStoreVersionLocalization: { data: ref('appStoreVersionLocalizations', versionLocalization.id) } }))).data;
   }
   const existing = await all(`/v1/appScreenshotSets/${set.id}/appScreenshots?limit=200`);
-  for (const screenshot of existing) await api('DELETE', `/v1/appScreenshots/${screenshot.id}`);
+  if (keepShots) {
+    if (existing.length !== 3) throw new Error(`SHOTS_DIR=keep but the set has ${existing.length} screenshots`);
+    console.log('iPhone 6.7-inch screenshots: keeping the 3 already uploaded');
+  }
+  for (const screenshot of keepShots ? [] : existing) await api('DELETE', `/v1/appScreenshots/${screenshot.id}`);
   console.log(`iPhone 6.7-inch screenshot set: removed ${existing.length} old screenshot(s)`);
   const uploaded = [];
-  for (const name of shots) uploaded.push(await uploadScreenshot(set.id, path.join(SHOTS_DIR, name)));
+  if (keepShots) for (const shot of existing) uploaded.push({ id: shot.id, name: shot.attributes.fileName });
+  else for (const name of shots) uploaded.push(await uploadScreenshot(set.id, path.join(SHOTS_DIR, name)));
   const shotsReady = await waitForScreenshots(uploaded);
   if (SUBMIT === 'true' && !shotsReady) throw new Error('Not submitting: screenshots are still processing');
 
@@ -289,7 +296,7 @@ async function main() {
     }
     const items = await all(`/v1/reviewSubmissions/${submission.id}/items?include=appStoreVersion&limit=200`);
     if (!items.some(item => item.relationships?.appStoreVersion?.data?.id === version.id)) {
-      await api('POST', '/v1/reviewSubmissionItems', request('reviewSubmissionItems', { type: 'APP_STORE_VERSION' },
+      await api('POST', '/v1/reviewSubmissionItems', request('reviewSubmissionItems', undefined,
         { reviewSubmission: { data: ref('reviewSubmissions', submission.id) },
           appStoreVersion: { data: ref('appStoreVersions', version.id) } }));
       console.log('App Store version: added to review submission');
@@ -299,6 +306,8 @@ async function main() {
         request('reviewSubmissions', { submitted: true }, undefined, submission.id))).data;
     }
     console.log(`Review submission ${submission.id}: ${submission.attributes.state || 'submitted'}`);
+    const state = (await api('GET', `/v1/appStoreVersions/${version.id}`)).data.attributes.appStoreState;
+    console.log(`App Store version ${version.attributes.versionString}: ${state}`);
   } else {
     console.log('Listing prepared; SUBMIT=false, so App Review was not requested');
   }
