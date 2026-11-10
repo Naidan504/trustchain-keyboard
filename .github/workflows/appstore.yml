@@ -12,6 +12,11 @@ on:
         required: false
         type: boolean
         default: false
+      status_only:
+        description: Only print the App Store / review status (changes nothing)
+        required: false
+        type: boolean
+        default: false
       keep_screenshots:
         description: Reuse the screenshots already in App Store Connect (skips the simulator)
         required: false
@@ -142,3 +147,4 @@ jobs:
           BUILD: ${{ inputs.build }}
           SUBMIT: ${{ inputs.submit }}
           SHOTS_DIR: ${{ inputs.keep_screenshots && 'keep' || 'appstore-shots' }}
+          STATUS_ONLY: ${{ inputs.status_only }}

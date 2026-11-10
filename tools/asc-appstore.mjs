@@ -171,6 +171,21 @@ async function main() {
   if (!app) throw new Error(`App ${BUNDLE_ID} not found`);
   console.log(`App: ${app.attributes.name} (${app.id})`);
 
+  if (process.env.STATUS_ONLY === 'true') {
+    // Read-only: print where each version and review submission stands, then stop.
+    const versions = await all(`/v1/apps/${app.id}/appStoreVersions?limit=20`);
+    for (const v of versions) console.log(`Version ${v.attributes.versionString}: ${v.attributes.appStoreState}${v.attributes.appVersionState ? ' / ' + v.attributes.appVersionState : ''} (created ${v.attributes.createdDate})`);
+    const subs = await all(`/v1/reviewSubmissions?filter[app]=${app.id}&limit=20`);
+    for (const r of subs) {
+      console.log(`Review submission ${r.id}: ${r.attributes.state} (submitted ${r.attributes.submittedDate || '-'})`);
+      try {
+        const items = await all(`/v1/reviewSubmissions/${r.id}/items?limit=20`);
+        for (const it of items) console.log(`  item: ${it.attributes.state}${it.attributes.resolved !== undefined ? ' resolved=' + it.attributes.resolved : ''}`);
+      } catch (e) { console.log(`  items: ${e.message}`); }
+    }
+    return;
+  }
+
   const build = (await all(`/v1/builds?filter[app]=${app.id}&filter[version]=${encodeURIComponent(BUILD)}&limit=50`))
     .find(item => item.attributes.version === BUILD);
   if (!build) throw new Error(`Build ${BUILD} not found for this app`);
