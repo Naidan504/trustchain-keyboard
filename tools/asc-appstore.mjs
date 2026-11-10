@@ -334,7 +334,7 @@ async function main() {
     }
     if (submission.attributes.state === 'UNRESOLVED_ISSUES') {
       // Resubmitting after App Review asked for changes or information: mark the rejected items resolved.
-      const video = await fetch(REVIEW_VIDEO_URL, { method: 'HEAD' });
+      const video = await fetch(REVIEW_VIDEO_URL, { headers: { range: 'bytes=0-0' } });
       if (!video.ok) throw new Error(`Not resubmitting: ${REVIEW_VIDEO_URL} returns HTTP ${video.status}`);
       const current = await all(`/v1/reviewSubmissions/${submission.id}/items?limit=200`);
       for (const item of current.filter(it => it.attributes.state === 'REJECTED')) {
