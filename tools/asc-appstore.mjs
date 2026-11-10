@@ -160,7 +160,7 @@ async function waitForScreenshots(uploaded) {
 }
 
 // Answers to App Review's "Guideline 2.1 - Information Needed" questions (2026-11-10).
-const REVIEW_VIDEO_URL = 'https://trustchain.mn/keyboard/review/demo.mp4';
+const REVIEW_VIDEO_URL = 'https://trustchain.mn/keyboard/review-demo.mp4';
 const REVIEW_NOTES = `1. Screen recording on a physical iPhone (latest iOS), starting from app launch: ${REVIEW_VIDEO_URL}
 
 2. Purpose and audience: TrustChain Keyboard is a custom keyboard for Mongolian Cyrillic. Mongolian has 35 letters, so the standard Mongolian layout fits 12 small keys per row. This keyboard shows the 27 most-used letters as larger keys in the familiar Mongolian order and puts the 8 rarely used letters (Е К Щ П Ё Ъ Ф Ю) on long-press of a related key (for example Г -> К). The problem it solves: fewer typos and faster typing on a phone. Audience: Mongolian-speaking iPhone users in Mongolia and abroad.
