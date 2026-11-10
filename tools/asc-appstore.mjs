@@ -159,6 +159,20 @@ async function waitForScreenshots(uploaded) {
   return false;
 }
 
+// Answers to App Review's "Guideline 2.1 - Information Needed" questions (2026-11-10).
+const REVIEW_VIDEO_URL = 'https://trustchain.mn/keyboard/review/demo.mp4';
+const REVIEW_NOTES = `1. Screen recording on a physical iPhone (latest iOS), starting from app launch: ${REVIEW_VIDEO_URL}
+
+2. Purpose and audience: TrustChain Keyboard is a custom keyboard for Mongolian Cyrillic. Mongolian has 35 letters, so the standard Mongolian layout fits 12 small keys per row. This keyboard shows the 27 most-used letters as larger keys in the familiar Mongolian order and puts the 8 rarely used letters (Е К Щ П Ё Ъ Ф Ю) on long-press of a related key (for example Г -> К). The problem it solves: fewer typos and faster typing on a phone. Audience: Mongolian-speaking iPhone users in Mongolia and abroad.
+
+3. Setup: no account, login, password or sample files. Open the app: it shows the setup steps and a test text field. Then Settings > General > Keyboard > Keyboards > Add New Keyboard > TrustChain Keyboard. In any text field (including the app's test field) tap the globe key to switch to TrustChain Keyboard. Tap keys to type; hold a key with a small letter in its corner (e.g. Г) and release to type that letter (К).
+
+4. External services: none. The keyboard has no network access, does not request Full Access, contains no third-party SDKs, analytics, ads, payments or AI services, and stores nothing the user types.
+
+5. Regional differences: none. The app works the same in all regions.
+
+6. Regulated industry or third-party material: not applicable. The app is free, has no in-app purchases, no accounts and no user-generated content.`;
+
 async function main() {
   // SHOTS_DIR=keep reuses the screenshots already in App Store Connect (quick resubmit).
   const keepShots = SHOTS_DIR === 'keep';
@@ -269,7 +283,7 @@ async function main() {
   const reviewText = {
     contactFirstName: 'Bilguun', contactLastName: 'Batbayar', contactPhone: '+976 96060544',
     contactEmail: 'bilguun.info@gmail.com', demoAccountRequired: false,
-    notes: 'TrustChain Keyboard is a Mongolian Cyrillic custom keyboard. To use: Settings > General > Keyboard > Keyboards > Add New Keyboard > TrustChain Keyboard, then switch with the globe key. It does not request Full Access and makes no network requests. Rare letters appear on long-press (e.g. hold Г for К).',
+    notes: REVIEW_NOTES,
   };
   if (review) {
     await api('PATCH', `/v1/appStoreReviewDetails/${review.id}`, request('appStoreReviewDetails', reviewText, undefined, review.id));
@@ -318,7 +332,18 @@ async function main() {
           appStoreVersion: { data: ref('appStoreVersions', version.id) } }));
       console.log('App Store version: added to review submission');
     }
-    if (!submission.attributes.submitted) {
+    if (submission.attributes.state === 'UNRESOLVED_ISSUES') {
+      // Resubmitting after App Review asked for changes or information: mark the rejected items resolved.
+      const video = await fetch(REVIEW_VIDEO_URL, { method: 'HEAD' });
+      if (!video.ok) throw new Error(`Not resubmitting: ${REVIEW_VIDEO_URL} returns HTTP ${video.status}`);
+      const current = await all(`/v1/reviewSubmissions/${submission.id}/items?limit=200`);
+      for (const item of current.filter(it => it.attributes.state === 'REJECTED')) {
+        await api('PATCH', `/v1/reviewSubmissionItems/${item.id}`, request('reviewSubmissionItems', { resolved: true }, undefined, item.id));
+        console.log(`Review item ${item.id}: marked resolved`);
+      }
+      submission = (await api('PATCH', `/v1/reviewSubmissions/${submission.id}`,
+        request('reviewSubmissions', { submitted: true }, undefined, submission.id))).data;
+    } else if (!submission.attributes.submitted) {
       submission = (await api('PATCH', `/v1/reviewSubmissions/${submission.id}`,
         request('reviewSubmissions', { submitted: true }, undefined, submission.id))).data;
     }
