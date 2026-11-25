@@ -7,3 +7,4 @@ agents/out/*.raw.txt
 local.properties
 .gradle/
 build/
+mn_keyboard/

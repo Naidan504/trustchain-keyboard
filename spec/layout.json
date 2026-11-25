@@ -1,7 +1,7 @@
 {
   "name": "TrustChain Keyboard",
   "version": 1,
-  "about": "Single source of truth for every platform. Letter rows keep the order of the standard Mongolian (MNS 5217) layout so existing typists feel at home; the 8 rarest letters move to long-press on a related key. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
+  "about": "Single source of truth for every platform. Letter rows keep the order of the standard Mongolian (MNS 5217) layout so existing typists feel at home; the 9 rarest letters move to long-press on a related key. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
   "longPressMs": 300,
   "letters": [
     [
@@ -9,7 +9,7 @@
       { "k": "г", "long": ["к"] }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }
     ],
     [
-      { "k": "й" }, { "k": "ы" }, { "k": "б", "long": ["п"] }, { "k": "ө" }, { "k": "а" },
+      { "k": "й", "long": ["ы"] }, { "k": "б", "long": ["п"] }, { "k": "ө" }, { "k": "а" },
       { "k": "х" }, { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }
     ],
     [
