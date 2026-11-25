@@ -19,9 +19,10 @@ if (!['true', 'false', undefined, ''].includes(SUBMIT)) {
 
 const description = `TrustChain Keyboard is a Mongolian Cyrillic keyboard for iPhone with fewer, bigger keys.
 
-Mongolian has 35 letters, so the standard keyboard crams 12 small keys into each row. TrustChain Keyboard shows the 27 letters you use most as big keys, in the familiar Mongolian order. The rarely used letters are one long-press away:
+Mongolian has 35 letters, so the standard keyboard crams 12 small keys into each row. TrustChain Keyboard shows the 26 letters you use most as big keys, in the familiar Mongolian order. The rarely used letters are one long-press away:
 • Г → К   • Ш → Щ   • Э → Е   • Б → П
 • В → Ф   • Ь → Ъ   • Я → Ё   • У → Ю
+• Й → Ы
 
 Hold a key, slide to the letter, release. That's it.
 
@@ -39,10 +40,12 @@ Made in Mongolia by Trustchain Tuul LLC.`;
 const versionText = {
   description,
   keywords: 'mongolian,keyboard,cyrillic,монгол,гар,mongol,kirill,khalkha,typing,big keys,монгол гар',
-  promotionalText: 'Type Mongolian Cyrillic faster: 27 big keys, rare letters on long-press. No Full Access, nothing you type ever leaves your phone.',
+  promotionalText: 'Type Mongolian Cyrillic faster: 26 big keys, rare letters on long-press. No Full Access, nothing you type ever leaves your phone.',
   supportUrl: URL,
   marketingUrl: URL,
 };
+// "What's New" is required for every version after the first; Apple rejects it on 1.0.
+const whatsNew = 'Ы is now a long-press on Й, so all 26 main keys are the letters you type most. Ы үсэг одоо Й товчийг удаан дарахад гарна.';
 const infoText = {
   subtitle: 'Mongolian keyboard, big keys',
   privacyPolicyUrl: `${URL}/privacy.html`,
@@ -163,7 +166,7 @@ async function waitForScreenshots(uploaded) {
 const REVIEW_VIDEO_URL = 'https://trustchain.mn/keyboard/review-demo.mp4';
 const REVIEW_NOTES = `1. Screen recording on a physical iPhone (latest iOS), starting from app launch: ${REVIEW_VIDEO_URL}
 
-2. Purpose and audience: TrustChain Keyboard is a custom keyboard for Mongolian Cyrillic. Mongolian has 35 letters, so the standard Mongolian layout fits 12 small keys per row. This keyboard shows the 27 most-used letters as larger keys in the familiar Mongolian order and puts the 8 rarely used letters (Е К Щ П Ё Ъ Ф Ю) on long-press of a related key (for example Г -> К). The problem it solves: fewer typos and faster typing on a phone. Audience: Mongolian-speaking iPhone users in Mongolia and abroad.
+2. Purpose and audience: TrustChain Keyboard is a custom keyboard for Mongolian Cyrillic. Mongolian has 35 letters, so the standard Mongolian layout fits 12 small keys per row. This keyboard shows the 26 most-used letters as larger keys in the familiar Mongolian order and puts the 9 less used letters (Е К Щ П Ё Ъ Ф Ю Ы) on long-press of a related key (for example Г -> К). The problem it solves: fewer typos and faster typing on a phone. Audience: Mongolian-speaking iPhone users in Mongolia and abroad.
 
 3. Setup: no account, login, password or sample files. Open the app: it shows the setup steps and a test text field. Then Settings > General > Keyboard > Keyboards > Add New Keyboard > TrustChain Keyboard. In any text field (including the app's test field) tap the globe key to switch to TrustChain Keyboard. Tap keys to type; hold a key with a small letter in its corner (e.g. Г) and release to type that letter (К).
 
@@ -229,7 +232,8 @@ async function main() {
 
   const versionLocalization = await upsertLocalization(
     `/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations`,
-    'appStoreVersionLocalizations', 'appStoreVersions', version.id, versionText);
+    'appStoreVersionLocalizations', 'appStoreVersions', version.id,
+    versionString === '1.0' || versionString === '1.0.0' ? versionText : { ...versionText, whatsNew });
 
   const infos = await all(`/v1/apps/${app.id}/appInfos?limit=200`);
   const info = infos.find(item => item.attributes.state === 'PREPARE_FOR_SUBMISSION')
