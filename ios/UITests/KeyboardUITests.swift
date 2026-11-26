@@ -179,19 +179,18 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
 
         let frame = keyboard.frame
-        // Mirrors KeyboardView: row 0 has 9 centred keys, row 1 has 10, row 2 is shift (1.4) + 8 letters + backspace (1.4).
+        // Mirrors KeyboardView: rows 0 and 1 have 9 centred keys (ы is long-press on й), row 2 is shift (1.4) + 8 letters + backspace (1.4).
         func key(_ row: Int, _ index: Int) -> XCUICoordinate {
             let x: CGFloat
             switch row {
-            case 0: x = frame.width / 10 * (0.5 + CGFloat(index) + 0.5)
-            case 1: x = frame.width / 10 * (CGFloat(index) + 0.5)
+            case 0, 1: x = frame.width / 10 * (0.5 + CGFloat(index) + 0.5)
             default: x = frame.width / 10.8 * (1.4 + CGFloat(index) + 0.5)
             }
             return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: 8 + 54 * (CGFloat(row) + 0.5)))
         }
         let space = keyboard.coordinate(withNormalizedOffset: .zero).withOffset(
             CGVector(dx: frame.width / 2, dy: 8 + 54 * 3.5))
-        let (s, a, y, n, b, u) = ((2, 2), (1, 4), (1, 0), (0, 4), (1, 2), (0, 1)) // с а й н б у
+        let (s, a, y, n, b, u) = ((2, 2), (1, 3), (1, 0), (0, 4), (1, 1), (0, 1)) // с а й н б у
         // Tap Сайн байна уу; the first letter is capitalized by the keyboard.
         for (row, index) in [s, a, y, n] { key(row, index).tap() }
         space.tap()
@@ -202,7 +201,7 @@ final class KeyboardUITests: XCTestCase {
         shot("appstore-1-typing", app)
 
         // Keep typing in the same session: " монгол гар"
-        let (m, o, g, l, r) = ((2, 3), (1, 7), (0, 5), (1, 8), (1, 6)) // м о г л р
+        let (m, o, g, l, r) = ((2, 3), (1, 6), (0, 5), (1, 7), (1, 5)) // м о г л р
         space.tap()
         for (row, index) in [m, o, n, g, o, l] { key(row, index).tap() }
         space.tap()
