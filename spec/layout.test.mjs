@@ -32,8 +32,10 @@ test('every rare (long-press only) letter is in 1 or 2 popups, never more', () =
   for (const c of rare) { const n = long.filter(x => x === c).length; assert.ok(n >= 1 && n <= 2, `${c} popup count ${n}`); }
 });
 
+// Letters under 0.05% of text (e.g. ъ) may sit second in a popup, behind a more common letter.
+const pct = Object.fromEntries(JSON.parse(fs.readFileSync(new URL('./letterfreq.json', import.meta.url), 'utf8')).letters.map(x => [x.ch, x.pct]));
 test('every rare letter is the first option on some key, so its corner hint is visible', () => {
-  const rare = ALPHABET.filter(c => !base.includes(c));
+  const rare = ALPHABET.filter(c => !base.includes(c) && (pct[c] ?? 0) >= 0.05);
   for (const c of rare) {
     const hasFirst = layout.letters.flat().some(k => (k.long || [])[0] === c);
     assert.ok(hasFirst, `no key shows ${c} as first long-press`);

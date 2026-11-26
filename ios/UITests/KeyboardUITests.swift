@@ -119,7 +119,7 @@ final class KeyboardUITests: XCTestCase {
         shot("3-our-keyboard", app)
         XCTAssertTrue(ourKeyboard.waitForExistence(timeout: 5), "could not switch to TrustChain Keyboard")
 
-        // Key geometry mirrors KeyboardView: 8pt top margin, 54pt rows; row 2 has 9 keys of width w/10, centred.
+        // Key geometry mirrors KeyboardView: 8pt top margin, 54pt rows; row 2 has 10 keys of width w/10.
         let f = ourKeyboard.frame
         func key(row: Int, index: Int, keysInRow: CGFloat = 10) -> XCUICoordinate {
             let unit = f.width / 10
@@ -128,14 +128,14 @@ final class KeyboardUITests: XCTestCase {
             let y = 8 + 54 * (CGFloat(row) + 0.5)
             return ourKeyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: y))
         }
-        // Row 2 (index 1): й б ө а х р о л д (9 keys; ы is long-press on й)
-        key(row: 1, index: 3, keysInRow: 9).tap()   // а → "А" (auto-capital at the start)
-        key(row: 1, index: 7, keysInRow: 9).tap()   // л
-        key(row: 1, index: 8, keysInRow: 9).tap()   // д
-        key(row: 1, index: 1, keysInRow: 9).press(forDuration: 0.8) // hold б → popup, first option п, release types it
+        // Row 2 (index 1): й б ө а х р о л д п (10 keys; ы is long-press on й, ю on п)
+        key(row: 1, index: 3, keysInRow: 10).tap()   // а → "А" (auto-capital at the start)
+        key(row: 1, index: 7, keysInRow: 10).tap()   // л
+        key(row: 1, index: 8, keysInRow: 10).tap()   // д
+        key(row: 1, index: 9, keysInRow: 10).press(forDuration: 0.8) // hold п → popup, first option ю, release types it
         sleep(1)
         shot("4-typed", app)
-        XCTAssertEqual(field.value as? String, "Алдп")
+        XCTAssertEqual(field.value as? String, "Алдю")
     }
 
     func testAppStoreScreenshots() throws {
@@ -179,12 +179,12 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
 
         let frame = keyboard.frame
-        // Mirrors KeyboardView: rows 0 and 1 have 9 centred keys (ы is long-press on й), row 2 is shift (1.4) + 8 letters + backspace (1.4).
+        // Mirrors KeyboardView: rows 0 and 1 have 10 keys of w/10; row 2 is shift (1.4) + 7 letters + backspace (1.4) = 9.8, centred.
         func key(_ row: Int, _ index: Int) -> XCUICoordinate {
             let x: CGFloat
             switch row {
-            case 0, 1: x = frame.width / 10 * (0.5 + CGFloat(index) + 0.5)
-            default: x = frame.width / 10.8 * (1.4 + CGFloat(index) + 0.5)
+            case 0, 1: x = frame.width / 10 * (CGFloat(index) + 0.5)
+            default: x = frame.width / 10 * (0.1 + 1.4 + CGFloat(index) + 0.5)
             }
             return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: 8 + 54 * (CGFloat(row) + 0.5)))
         }

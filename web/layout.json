@@ -1,20 +1,20 @@
 {
   "name": "TrustChain Keyboard",
   "version": 1,
-  "about": "Single source of truth for every platform. Letter rows keep the order of the standard Mongolian (MNS 5217) layout so existing typists feel at home; the 9 rarest letters move to long-press on a related key. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
+  "about": "Single source of truth for every platform. Starts from the standard Mongolian (MNS 5217) 12-column layout: the outer column letters move to long-press on their inner neighbour (ф→ц, е→к, ю→п, я→ч, в→ь), except й, which keeps its key and takes ы on long-press. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
   "longPressMs": 300,
   "letters": [
     [
-      { "k": "ц" }, { "k": "у", "long": ["ю"] }, { "k": "ж" }, { "k": "э", "long": ["е"] }, { "k": "н" },
-      { "k": "г", "long": ["к"] }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }
+      { "k": "ц", "long": ["ф"] }, { "k": "у" }, { "k": "ж" }, { "k": "э" }, { "k": "н" },
+      { "k": "г" }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }, { "k": "к", "long": ["е"] }
     ],
     [
-      { "k": "й", "long": ["ы"] }, { "k": "б", "long": ["п"] }, { "k": "ө" }, { "k": "а" },
-      { "k": "х" }, { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }
+      { "k": "й", "long": ["ы"] }, { "k": "б" }, { "k": "ө" }, { "k": "а" }, { "k": "х" },
+      { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }, { "k": "п", "long": ["ю"] }
     ],
     [
-      { "k": "я", "long": ["ё"] }, { "k": "ч" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
-      { "k": "т" }, { "k": "ь", "long": ["ъ"] }, { "k": "в", "long": ["ф"] }
+      { "k": "ч", "long": ["я"] }, { "k": "ё" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
+      { "k": "т" }, { "k": "ь", "long": ["в", "ъ"] }
     ]
   ],
   "row3": { "left": "shift", "right": "backspace" },
