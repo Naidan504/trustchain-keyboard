@@ -120,12 +120,13 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertTrue(ourKeyboard.waitForExistence(timeout: 5), "could not switch to TrustChain Keyboard")
 
         // Key geometry mirrors KeyboardView's iPhone mode: 1% side margins, pitch p = 0.98 w / 10, first row slot
-        // 0.483p from the top, rows 1.40p apart; row 2 has 9 keys centred (half a key in on each side).
+        // first row slot and row height fixed per phone class (as Apple does); row 2 has 9 keys centred (half a key in on each side).
         let f = ourKeyboard.frame
         func key(row: Int, index: Int, keysInRow: CGFloat = 10) -> XCUICoordinate {
             let p = f.width * 0.98 / 10
             let x = f.width * 0.01 + (p * 10 - p * keysInRow) / 2 + p * (CGFloat(index) + 0.5)
-            let y = p * (0.483 + 1.40 * (CGFloat(row) + 0.5))
+            let big = f.width >= 428, rowH: CGFloat = big ? 53.7 * 226 / 216 : 53.7, keyH: CGFloat = big ? 41.8 * 226 / 216 : 41.8
+            let y = (big ? 24.5 * 226 / 216 : 24.5) - (rowH - keyH) / 2 + rowH * (CGFloat(row) + 0.5)
             return ourKeyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: y))
         }
         // Row 2 (index 1): й б ө а х р о л д (9 keys; ю and п are long-press on д)
@@ -182,7 +183,8 @@ final class KeyboardUITests: XCTestCase {
         // Mirrors KeyboardView's iPhone mode: pitch p = 0.98 w / 10 with 1% side margins; row 0 has 10 keys,
         // row 1 has 9 keys inset half a key, row 2 is shift (1.5) + 7 letters + backspace (1.5); bottom row 123 (2.5) + space (4.8).
         let p = frame.width * 0.98 / 10, side = frame.width * 0.01
-        func y(_ row: CGFloat) -> CGFloat { p * (0.483 + 1.40 * (row + 0.5)) }
+        let big = frame.width >= 428, rowH: CGFloat = big ? 53.7 * 226 / 216 : 53.7, keyH: CGFloat = big ? 41.8 * 226 / 216 : 41.8
+        func y(_ row: CGFloat) -> CGFloat { (big ? 24.5 * 226 / 216 : 24.5) - (rowH - keyH) / 2 + rowH * (row + 0.5) }
         func key(_ row: Int, _ index: Int) -> XCUICoordinate {
             let start: CGFloat = row == 0 ? 0 : row == 1 ? 0.5 : 1.5
             return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: side + p * (start + CGFloat(index) + 0.5), dy: y(CGFloat(row))))

@@ -1,15 +1,12 @@
 {
   "name": "TrustChain Keyboard",
   "version": 1,
-  "about": "Single source of truth for every platform. Experiment (layout-12col): Cyrillic letters in the English iPhone layout (10 / 9 / shift + 7 + backspace); outer letters п, я, в on long-press. iphone: key sizes and bottom row match Apple's keyboard so nothing moves when switching keyboards.",
+  "about": "Single source of truth for every platform. Experiment (layout-12col): Cyrillic letters in the English iPhone layout (10 / 9 / shift + 7 + backspace). Long-press: е→к, й→ы, б→п, д→ю, ч→я, ь→в ъ. ф and щ are left out (omitted). iphone: Apple's key sizes so nothing moves when switching keyboards.",
   "longPressMs": 300,
   "letters": [
     [
       {
-        "k": "ц",
-        "long": [
-          "ф"
-        ]
+        "k": "ц"
       },
       {
         "k": "у"
@@ -27,10 +24,7 @@
         "k": "г"
       },
       {
-        "k": "ш",
-        "long": [
-          "щ"
-        ]
+        "k": "ш"
       },
       {
         "k": "ү"
@@ -39,9 +33,9 @@
         "k": "з"
       },
       {
-        "k": "к",
+        "k": "е",
         "long": [
-          "е"
+          "к"
         ]
       }
     ],
@@ -53,7 +47,10 @@
         ]
       },
       {
-        "k": "б"
+        "k": "б",
+        "long": [
+          "п"
+        ]
       },
       {
         "k": "ө"
@@ -76,8 +73,7 @@
       {
         "k": "д",
         "long": [
-          "ю",
-          "п"
+          "ю"
         ]
       }
     ],
@@ -235,5 +231,9 @@
     "shift": "tap = next letter capital; double tap = caps lock",
     "noNetwork": "The keyboard never uses the network and never stores what is typed."
   },
-  "iphone": true
+  "iphone": true,
+  "omitted": [
+    "ф",
+    "щ"
+  ]
 }

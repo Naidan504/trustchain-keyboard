@@ -7,7 +7,8 @@ import java.io.File
 
 class LayoutTest {
     private val layout = Layout.parse(File("src/main/assets/layout.json").readText())
-    private val alphabet = "абвгдеёжзийклмноөпрстуүфхцчшщъыьэюя".map { it.toString() }
+    // ф and щ are left out on purpose (layout.json "omitted").
+    private val alphabet = "абвгдеёжзийклмноөпрстуүхцчшъыьэюя".map { it.toString() }
 
     @Test fun allLettersReachable() {
         val chars = layout.letters.flatten().filter { it.type == KeyDef.Type.CHAR }

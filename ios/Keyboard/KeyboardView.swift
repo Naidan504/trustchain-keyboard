@@ -28,18 +28,23 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     static let classicRowH: CGFloat = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) >= 428 ? 54.5 : 52
     private let gap: CGFloat = 3
 
-    // iPhone geometry (layout.iphone), measured on Apple's keyboard on a 390pt iPhone and scaled to the width,
-    // so switching keyboards moves nothing: 1% side margins, key pitch p = 98% of width / 10, keys 0.79p x 1.09p,
-    // rows 1.40p apart, 0.483p above the first row's slot (24.5pt to the first key top at p = 38.2).
+    // iPhone geometry (layout.iphone), matching Apple's keyboard so switching keyboards moves nothing.
+    // Like Apple, widths follow the screen and heights are fixed per phone class: measured on a 390pt iPhone
+    // (first key top 24.5pt down, keys 41.8pt tall, rows 53.7pt apart); Plus/Max phones (≥ 428pt wide) are
+    // 226/216 taller, as Apple's keyboard is. Width: 1% side margins, key pitch p = 98% of width / 10, key 0.79p wide.
     static func pitch(_ width: CGFloat) -> CGFloat { width * 0.98 / 10 }
+    private static var big: Bool { min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) >= 428 }
+    private static var iRowH: CGFloat { big ? 53.7 * 226 / 216 : 53.7 }
+    private static var iKeyH: CGFloat { big ? 41.8 * 226 / 216 : 41.8 }
+    private static var iBarH: CGFloat { (big ? 24.5 * 226 / 216 : 24.5) - (iRowH - iKeyH) / 2 } // top of the first row's slot
     static func preferredHeight(width: CGFloat, rows: Int, iphone: Bool) -> CGFloat {
-        iphone ? pitch(width) * (0.483 + 1.40 * CGFloat(rows)) : classicBarH + CGFloat(rows) * classicRowH
+        iphone ? iBarH + CGFloat(rows) * iRowH : classicBarH + CGFloat(rows) * classicRowH
     }
     private var p: CGFloat { Self.pitch(bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width) }
-    var barH: CGFloat { layout.iphone ? p * 0.483 : Self.classicBarH }
-    var rowH: CGFloat { layout.iphone ? p * 1.40 : Self.classicRowH }
+    var barH: CGFloat { layout.iphone ? Self.iBarH : Self.classicBarH }
+    var rowH: CGFloat { layout.iphone ? Self.iRowH : Self.classicRowH }
     private var gapX: CGFloat { layout.iphone ? p * 0.103 : gap }
-    private var gapY: CGFloat { layout.iphone ? p * 0.155 : gap }
+    private var gapY: CGFloat { layout.iphone ? (Self.iRowH - Self.iKeyH) / 2 : gap }
     private var side: CGFloat { layout.iphone ? bounds.width * 0.01 : 0 }
     private let radius: CGFloat = 7
 

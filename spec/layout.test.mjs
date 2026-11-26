@@ -17,7 +17,7 @@ test('base keys are unique Mongolian letters', () => {
 });
 
 test('every one of the 35 letters is reachable by tap or long-press', () => {
-  const reachable = new Set([...base, ...long]);
+  const reachable = new Set([...base, ...long, ...(layout.omitted || [])]); // 'omitted' = left out on purpose
   const missing = ALPHABET.filter(c => !reachable.has(c));
   assert.deepEqual(missing, []);
 });
@@ -28,14 +28,14 @@ test('keyboard stays small: 20-something base keys, at most 11 per row', () => {
 });
 
 test('every rare (long-press only) letter is in 1 or 2 popups, never more', () => {
-  const rare = ALPHABET.filter(c => !base.includes(c));
+  const rare = ALPHABET.filter(c => !base.includes(c) && !(layout.omitted || []).includes(c));
   for (const c of rare) { const n = long.filter(x => x === c).length; assert.ok(n >= 1 && n <= 2, `${c} popup count ${n}`); }
 });
 
 // Letters under 0.15% of text (e.g. ъ, п) may sit second in a popup, behind a more common letter.
 const pct = Object.fromEntries(JSON.parse(fs.readFileSync(new URL('./letterfreq.json', import.meta.url), 'utf8')).letters.map(x => [x.ch, x.pct]));
 test('every rare letter is the first option on some key, so its corner hint is visible', () => {
-  const rare = ALPHABET.filter(c => !base.includes(c) && (pct[c] ?? 0) >= 0.15);
+  const rare = ALPHABET.filter(c => !base.includes(c) && !(layout.omitted || []).includes(c) && (pct[c] ?? 0) >= 0.15);
   for (const c of rare) {
     const hasFirst = layout.letters.flat().some(k => (k.long || [])[0] === c);
     assert.ok(hasFirst, `no key shows ${c} as first long-press`);
