@@ -12,7 +12,7 @@ final class SetupViewController: UIViewController {
         view.backgroundColor = .systemBackground
 
         let title = label("TrustChain Keyboard", size: 28, weight: .bold, color: brand)
-        let lead = label("35 үсэг, 27 том товч. Ховор үсгүүд хажуугийн товчоо удаан дарахад гарна: ц→ф, к→е, п→ю, ч→я, ь→в ъ, ш→щ, й→ы.", size: 17)
+        let lead = label("35 үсэг, 29 том товч. Ховор үсгүүд хажуугийн товчоо удаан дарахад гарна: к→е, п→ю, ь→в ъ, ш→щ, й→ы.", size: 17)
         let stepsTitle = label("Гараа нэмэх", size: 20, weight: .semibold)
         let steps = label("1. Settings (Тохиргоо) аппыг нээнэ → General → Keyboard → Keyboards\n2. Add New Keyboard… → «Third-Party Keyboards» хэсгээс TrustChain Keyboard\n3. Бичих үедээ 🌐 товчийг дарж TrustChain гар руу шилжинэ.", size: 16)
 

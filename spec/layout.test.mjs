@@ -22,9 +22,9 @@ test('every one of the 35 letters is reachable by tap or long-press', () => {
   assert.deepEqual(missing, []);
 });
 
-test('keyboard stays small: 20-something base keys, at most 10 per row', () => {
+test('keyboard stays small: 20-something base keys, at most 11 per row', () => {
   assert.ok(base.length >= 20 && base.length <= 29, `base keys: ${base.length}`);
-  for (const row of layout.letters) assert.ok(row.length <= 10, `row has ${row.length} keys`);
+  for (const row of layout.letters) assert.ok(row.length <= 11, `row has ${row.length} keys`);
 });
 
 test('every rare (long-press only) letter is in 1 or 2 popups, never more', () => {

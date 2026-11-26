@@ -1,12 +1,12 @@
 {
   "name": "TrustChain Keyboard",
   "version": 1,
-  "about": "Single source of truth for every platform. Starts from the standard Mongolian (MNS 5217) 12-column layout: the outer column letters move to long-press on their inner neighbour (ф→ц, е→к, ю→п, я→ч, в→ь), except й, which keeps its key and takes ы on long-press. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
+  "about": "Single source of truth for every platform. Starts from the standard Mongolian (MNS 5217) 12-column layout. Left column kept (ф й я). Right column letters move to long-press on their inner neighbour (е→к, ю→п, в→ь); ы rides on й. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
   "longPressMs": 300,
   "fillRows": true,
   "letters": [
     [
-      { "k": "ц", "long": ["ф"] }, { "k": "у" }, { "k": "ж" }, { "k": "э" }, { "k": "н" },
+      { "k": "ф" }, { "k": "ц" }, { "k": "у" }, { "k": "ж" }, { "k": "э" }, { "k": "н" },
       { "k": "г" }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }, { "k": "к", "long": ["е"] }
     ],
     [
@@ -14,7 +14,7 @@
       { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }, { "k": "п", "long": ["ю"] }
     ],
     [
-      { "k": "ч", "long": ["я"] }, { "k": "ё" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
+      { "k": "я" }, { "k": "ч" }, { "k": "ё" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
       { "k": "т" }, { "k": "ь", "long": ["в", "ъ"] }
     ]
   ],
