@@ -29,16 +29,21 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     private let gap: CGFloat = 3
 
     // iPhone geometry (layout.iphone), matching Apple's keyboard so switching keyboards moves nothing.
-    // Like Apple, widths follow the screen and heights are fixed per phone class: measured on a 390pt iPhone
-    // (first key top 24.5pt down, keys 41.8pt tall, rows 53.7pt apart); Plus/Max phones (≥ 428pt wide) are
-    // 226/216 taller, as Apple's keyboard is. Width: 1% side margins, key pitch p = 98% of width / 10, key 0.79p wide.
+    // Measured on device (iOS 26, 390pt iPhone, Apple keyboard vs this one in the same app): iOS gives a custom
+    // keyboard a 207.7pt view whose top sits where Apple's panel content starts and whose bottom is 3.8pt above
+    // Apple's bottom key row. So: same total height (the text field doesn't move), first key 7.6pt down (Apple's
+    // row 1 position exactly), keys 42.2pt tall, last row flush with the bottom, rows 52.64pt apart (the 3.8pt
+    // shortfall is spread over the three row gaps). Widths follow the screen like Apple's: 1% side margins,
+    // pitch p = 98% of width / 10, key 0.79p wide. Plus/Max phones (≥ 428pt wide) scale heights by 226/216.
     static func pitch(_ width: CGFloat) -> CGFloat { width * 0.98 / 10 }
     private static var big: Bool { min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) >= 428 }
-    private static var iRowH: CGFloat { big ? 53.7 * 226 / 216 : 53.7 }
-    private static var iKeyH: CGFloat { big ? 41.8 * 226 / 216 : 41.8 }
-    private static var iBarH: CGFloat { (big ? 24.5 * 226 / 216 : 24.5) - (iRowH - iKeyH) / 2 } // top of the first row's slot
+    private static var k: CGFloat { big ? 226 / 216 : 1 }
+    private static var iRowH: CGFloat { 52.64 * k }
+    private static var iKeyH: CGFloat { 42.2 * k }
+    private static var iBarH: CGFloat { 7.6 * k - (iRowH - iKeyH) / 2 } // top of the first row's slot
     static func preferredHeight(width: CGFloat, rows: Int, iphone: Bool) -> CGFloat {
-        iphone ? iBarH + CGFloat(rows) * iRowH : classicBarH + CGFloat(rows) * classicRowH
+        // iPhone: the last row's key ends flush with the bottom of the view.
+        iphone ? iBarH + CGFloat(rows - 1) * iRowH + (iRowH - iKeyH) / 2 + iKeyH : classicBarH + CGFloat(rows) * classicRowH
     }
     private var p: CGFloat { Self.pitch(bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width) }
     var barH: CGFloat { layout.iphone ? Self.iBarH : Self.classicBarH }
@@ -121,8 +126,8 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     // MARK: drawing
 
     override func draw(_ rect: CGRect) {
-        cBg.setFill()
-        UIRectFill(bounds)
+        // iPhone mode leaves the background clear so iOS's own keyboard background shows, as behind Apple's keys.
+        if !layout.iphone { cBg.setFill(); UIRectFill(bounds) }
         for i in keys.indices { drawKey(i) }
         if let a = active {
             if popup != nil { drawPopup() }
@@ -158,7 +163,12 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
     private func drawKey(_ i: Int) {
         let k = keys[i]
-        let r = k.rect.insetBy(dx: gapX, dy: gapY)
+        var r = k.rect.insetBy(dx: gapX, dy: gapY)
+        // Apple draws shift and backspace 1.10 pitch wide at the outer edge, leaving a wider gap to the letters.
+        if layout.iphone && (k.def.kind == .shift || k.def.kind == .backspace) && r.width > p * 1.10 {
+            r = k.def.kind == .shift ? CGRect(x: r.minX, y: r.minY, width: p * 1.10, height: r.height)
+                                     : CGRect(x: r.maxX - p * 1.10, y: r.minY, width: p * 1.10, height: r.height)
+        }
         let pressed = active == i && popup == nil
         let special = k.def.kind != .char && k.def.kind != .space
         let accent = k.def.kind == .enter || (k.def.kind == .shift && shift != .off)
