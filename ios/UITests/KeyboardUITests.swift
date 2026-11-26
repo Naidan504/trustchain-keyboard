@@ -119,20 +119,20 @@ final class KeyboardUITests: XCTestCase {
         shot("3-our-keyboard", app)
         XCTAssertTrue(ourKeyboard.waitForExistence(timeout: 5), "could not switch to TrustChain Keyboard")
 
-        // Key geometry mirrors KeyboardView: 8pt top margin, 54pt rows; row 2 has 10 keys of width w/10.
+        // Key geometry mirrors KeyboardView's iPhone mode: 1% side margins, pitch p = 0.98 w / 10, first row slot
+        // 0.483p from the top, rows 1.40p apart; row 2 has 9 keys centred (half a key in on each side).
         let f = ourKeyboard.frame
         func key(row: Int, index: Int, keysInRow: CGFloat = 10) -> XCUICoordinate {
-            let unit = f.width / max(keysInRow, 10) // fillRows: an 11-key row uses w/11
-            let x0 = (f.width - unit * keysInRow) / 2
-            let x = x0 + unit * (CGFloat(index) + 0.5)
-            let y = 8 + 54 * (CGFloat(row) + 0.5)
+            let p = f.width * 0.98 / 10
+            let x = f.width * 0.01 + (p * 10 - p * keysInRow) / 2 + p * (CGFloat(index) + 0.5)
+            let y = p * (0.483 + 1.40 * (CGFloat(row) + 0.5))
             return ourKeyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: y))
         }
-        // Row 2 (index 1): й ы б ө а х р о л д п (11 keys; ю is long-press on п)
-        key(row: 1, index: 4, keysInRow: 11).tap()   // а → "А" (auto-capital at the start)
-        key(row: 1, index: 8, keysInRow: 11).tap()   // л
-        key(row: 1, index: 9, keysInRow: 11).tap()   // д
-        key(row: 1, index: 10, keysInRow: 11).press(forDuration: 0.8) // hold п → popup, first option ю, release types it
+        // Row 2 (index 1): й б ө а х р о л д (9 keys; ю and п are long-press on д)
+        key(row: 1, index: 3, keysInRow: 9).tap()   // а → "А" (auto-capital at the start)
+        key(row: 1, index: 7, keysInRow: 9).tap()   // л
+        key(row: 1, index: 8, keysInRow: 9).tap()   // д
+        key(row: 1, index: 8, keysInRow: 9).press(forDuration: 0.8) // hold д → popup, first option ю, release types it
         sleep(1)
         shot("4-typed", app)
         XCTAssertEqual(field.value as? String, "Алдю")
@@ -179,29 +179,27 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
 
         let frame = keyboard.frame
-        // Mirrors KeyboardView with fillRows: rows 0 and 1 have 11 keys of w/11; row 2 is shift (1.4) + 8 letters + backspace (1.4) = 10.8 units stretched to w.
+        // Mirrors KeyboardView's iPhone mode: pitch p = 0.98 w / 10 with 1% side margins; row 0 has 10 keys,
+        // row 1 has 9 keys inset half a key, row 2 is shift (1.5) + 7 letters + backspace (1.5); bottom row 123 (2.5) + space (4.8).
+        let p = frame.width * 0.98 / 10, side = frame.width * 0.01
+        func y(_ row: CGFloat) -> CGFloat { p * (0.483 + 1.40 * (row + 0.5)) }
         func key(_ row: Int, _ index: Int) -> XCUICoordinate {
-            let x: CGFloat
-            switch row {
-            case 0, 1: x = frame.width / 11 * (CGFloat(index) + 0.5)
-            default: x = frame.width / 10.8 * (1.4 + CGFloat(index) + 0.5)
-            }
-            return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: 8 + 54 * (CGFloat(row) + 0.5)))
+            let start: CGFloat = row == 0 ? 0 : row == 1 ? 0.5 : 1.5
+            return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: side + p * (start + CGFloat(index) + 0.5), dy: y(CGFloat(row))))
         }
-        let space = keyboard.coordinate(withNormalizedOffset: .zero).withOffset(
-            CGVector(dx: frame.width / 2, dy: 8 + 54 * 3.5))
-        let (s, a, y, n, b, u) = ((2, 3), (1, 4), (1, 0), (0, 5), (1, 2), (0, 2)) // с а й н б у
+        let space = keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: side + p * (2.5 + 2.4), dy: y(3)))
+        let (s, a, y_, n, b, u) = ((2, 2), (1, 3), (1, 0), (0, 4), (1, 1), (0, 1)) // с а й н б у
         // Tap Сайн байна уу; the first letter is capitalized by the keyboard.
-        for (row, index) in [s, a, y, n] { key(row, index).tap() }
+        for (row, index) in [s, a, y_, n] { key(row, index).tap() }
         space.tap()
-        for (row, index) in [b, a, y, n, a] { key(row, index).tap() }
+        for (row, index) in [b, a, y_, n, a] { key(row, index).tap() }
         space.tap()
         for (row, index) in [u, u] { key(row, index).tap() }
         XCTAssertEqual(field.value as? String, "Сайн байна уу")
         shot("appstore-1-typing", app)
 
         // Keep typing in the same session: " монгол гар"
-        let (m, o, g, l, r) = ((2, 4), (1, 7), (0, 6), (1, 8), (1, 6)) // м о г л р
+        let (m, o, g, l, r) = ((2, 3), (1, 6), (0, 5), (1, 7), (1, 5)) // м о г л р
         space.tap()
         for (row, index) in [m, o, n, g, o, l] { key(row, index).tap() }
         space.tap()

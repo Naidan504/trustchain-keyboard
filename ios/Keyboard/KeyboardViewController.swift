@@ -27,15 +27,16 @@ final class KeyboardViewController: UIInputViewController, KeyboardViewDelegate 
         super.viewWillAppear(animated)
         lastSpaceAt = .distantPast
         lastShiftTap = .distantPast
+        // The globe key is only needed when the system doesn't show its own.
+        kb.layout = Layout.load(withGlobe: needsInputModeSwitchKey)
         if heightConstraint == nil {
-            let rows = CGFloat(kb.rows.count)
-            let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.barH + rows * KeyboardView.rowH)
+            let width = view.window?.screen.bounds.width ?? UIScreen.main.bounds.width
+            let h = view.heightAnchor.constraint(equalToConstant: KeyboardView.preferredHeight(
+                width: min(width, UIScreen.main.bounds.height), rows: kb.rows.count, iphone: kb.layout.iphone))
             h.priority = UILayoutPriority(999)
             h.isActive = true
             heightConstraint = h
         }
-        // The globe key is only needed when the system doesn't show its own.
-        kb.layout = Layout.load(withGlobe: needsInputModeSwitchKey)
         updateAppearance()
         updateAutoShift()
     }

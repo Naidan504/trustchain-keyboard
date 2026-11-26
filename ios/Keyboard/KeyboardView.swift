@@ -23,10 +23,24 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
     var enableInputClicksWhenVisible: Bool { true }
 
-    static let barH: CGFloat = 8 // top margin only; the brand bar was removed (C1)
-    // Same total height as Apple's keyboard, so nothing jumps when switching: 216pt, or 226pt on Plus/Max phones.
-    static let rowH: CGFloat = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) >= 428 ? 54.5 : 52
+    static let classicBarH: CGFloat = 8 // top margin only; the brand bar was removed (C1)
+    // Classic geometry: 216pt total, or 226pt on Plus/Max phones.
+    static let classicRowH: CGFloat = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height) >= 428 ? 54.5 : 52
     private let gap: CGFloat = 3
+
+    // iPhone geometry (layout.iphone), measured on Apple's keyboard on a 390pt iPhone and scaled to the width,
+    // so switching keyboards moves nothing: 1% side margins, key pitch p = 98% of width / 10, keys 0.79p x 1.09p,
+    // rows 1.40p apart, 0.483p above the first row's slot (24.5pt to the first key top at p = 38.2).
+    static func pitch(_ width: CGFloat) -> CGFloat { width * 0.98 / 10 }
+    static func preferredHeight(width: CGFloat, rows: Int, iphone: Bool) -> CGFloat {
+        iphone ? pitch(width) * (0.483 + 1.40 * CGFloat(rows)) : classicBarH + CGFloat(rows) * classicRowH
+    }
+    private var p: CGFloat { Self.pitch(bounds.width > 0 ? bounds.width : UIScreen.main.bounds.width) }
+    var barH: CGFloat { layout.iphone ? p * 0.483 : Self.classicBarH }
+    var rowH: CGFloat { layout.iphone ? p * 1.40 : Self.classicRowH }
+    private var gapX: CGFloat { layout.iphone ? p * 0.103 : gap }
+    private var gapY: CGFloat { layout.iphone ? p * 0.155 : gap }
+    private var side: CGFloat { layout.iphone ? bounds.width * 0.01 : 0 }
     private let radius: CGFloat = 7
 
     private struct KeyRect { let def: KeyDef; var rect: CGRect; let row: Int }
@@ -66,7 +80,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     }
 
     private func rebuild() {
-        let w = bounds.width
+        let w = bounds.width - 2 * side
         guard w > 0 else { return }
         var out: [KeyRect] = []
         for (r, row) in rows.enumerated() {
@@ -74,11 +88,11 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
             // Short rows keep the key width of a 10-key row and are centred, like a normal keyboard,
             // unless the layout asks every row to stretch edge to edge (fillRows).
             let unit = layout.fillRows ? w / total : min(w / total, w / 10)
-            var x = (w - unit * total) / 2
-            let top = Self.barH + CGFloat(r) * Self.rowH
+            var x = side + (w - unit * total) / 2
+            let top = barH + CGFloat(r) * rowH
             for k in row {
                 let kw = unit * k.weight
-                out.append(KeyRect(def: k, rect: CGRect(x: x, y: top, width: kw, height: Self.rowH), row: r))
+                out.append(KeyRect(def: k, rect: CGRect(x: x, y: top, width: kw, height: rowH), row: r))
                 x += kw
             }
         }
@@ -139,7 +153,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
     private func drawKey(_ i: Int) {
         let k = keys[i]
-        let r = k.rect.insetBy(dx: gap, dy: gap)
+        let r = k.rect.insetBy(dx: gapX, dy: gapY)
         let pressed = active == i && popup == nil
         let special = k.def.kind != .char && k.def.kind != .space
         let accent = k.def.kind == .enter || (k.def.kind == .shift && shift != .off)
@@ -156,7 +170,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
 
     private func drawPreview(_ k: KeyRect) {
         let w = max(k.rect.width, 44)
-        let h = Self.rowH * 1.05
+        let h = rowH * 1.05
         let left = min(max(0, k.rect.midX - w / 2), bounds.width - w)
         let r = CGRect(x: left, y: max(0, k.rect.minY - h), width: w, height: h)
         roundRect(r, cPopup)
@@ -177,8 +191,8 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
     // MARK: touch
 
     private func keyIndex(at p: CGPoint) -> Int? {
-        guard p.y >= Self.barH - 6 else { return nil }
-        let row = min(max(0, Int((p.y - Self.barH) / Self.rowH)), rows.count - 1)
+        guard p.y >= barH - 6 else { return nil }
+        let row = min(max(0, Int((p.y - barH) / rowH)), rows.count - 1)
         let inRow = keys.indices.filter { keys[$0].row == row }
         if let hit = inRow.first(where: { p.x >= keys[$0].rect.minX && p.x < keys[$0].rect.maxX }) { return hit }
         return inRow.min(by: { abs(keys[$0].rect.midX - p.x) < abs(keys[$1].rect.midX - p.x) })
@@ -265,7 +279,7 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         longFired = true
         popupCellW = max(k.rect.width, 42)
         let w = popupCellW * CGFloat(k.def.long.count)
-        let h = Self.rowH * 1.05
+        let h = rowH * 1.05
         // The first option sits right above the key, so "hold and release" picks it with no slide.
         let left = min(max(0, k.rect.midX - popupCellW / 2), bounds.width - w)
         popupRect = CGRect(x: left, y: max(0, k.rect.minY - h), width: w, height: h)

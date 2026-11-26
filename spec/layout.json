@@ -1,38 +1,225 @@
 {
   "name": "TrustChain Keyboard",
   "version": 1,
-  "about": "Single source of truth for every platform. The standard Mongolian (MNS 5217) 12-column layout with only the rightmost column merged into its left neighbour as long-press (е→к, ю→п, в→ь); щ and ъ stay on ш and ь. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
+  "about": "Single source of truth for every platform. Experiment (layout-12col): Cyrillic letters in the English iPhone layout (10 / 9 / shift + 7 + backspace); outer letters п, я, в on long-press. iphone: key sizes and bottom row match Apple's keyboard so nothing moves when switching keyboards.",
   "longPressMs": 300,
-  "fillRows": true,
   "letters": [
     [
-      { "k": "ф" }, { "k": "ц" }, { "k": "у" }, { "k": "ж" }, { "k": "э" }, { "k": "н" },
-      { "k": "г" }, { "k": "ш", "long": ["щ"] }, { "k": "ү" }, { "k": "з" }, { "k": "к", "long": ["е"] }
+      {
+        "k": "ц",
+        "long": [
+          "ф"
+        ]
+      },
+      {
+        "k": "у"
+      },
+      {
+        "k": "ж"
+      },
+      {
+        "k": "э"
+      },
+      {
+        "k": "н"
+      },
+      {
+        "k": "г"
+      },
+      {
+        "k": "ш",
+        "long": [
+          "щ"
+        ]
+      },
+      {
+        "k": "ү"
+      },
+      {
+        "k": "з"
+      },
+      {
+        "k": "к",
+        "long": [
+          "е"
+        ]
+      }
     ],
     [
-      { "k": "й" }, { "k": "ы" }, { "k": "б" }, { "k": "ө" }, { "k": "а" }, { "k": "х" },
-      { "k": "р" }, { "k": "о" }, { "k": "л" }, { "k": "д" }, { "k": "п", "long": ["ю"] }
+      {
+        "k": "й",
+        "long": [
+          "ы"
+        ]
+      },
+      {
+        "k": "б"
+      },
+      {
+        "k": "ө"
+      },
+      {
+        "k": "а"
+      },
+      {
+        "k": "х"
+      },
+      {
+        "k": "р"
+      },
+      {
+        "k": "о"
+      },
+      {
+        "k": "л"
+      },
+      {
+        "k": "д",
+        "long": [
+          "ю",
+          "п"
+        ]
+      }
     ],
     [
-      { "k": "я" }, { "k": "ч" }, { "k": "ё" }, { "k": "с" }, { "k": "м" }, { "k": "и" },
-      { "k": "т" }, { "k": "ь", "long": ["в", "ъ"] }
+      {
+        "k": "ч",
+        "long": [
+          "я"
+        ]
+      },
+      {
+        "k": "ё"
+      },
+      {
+        "k": "с"
+      },
+      {
+        "k": "м"
+      },
+      {
+        "k": "и"
+      },
+      {
+        "k": "т"
+      },
+      {
+        "k": "ь",
+        "long": [
+          "в",
+          "ъ"
+        ]
+      }
     ]
   ],
-  "row3": { "left": "shift", "right": "backspace" },
+  "row3": {
+    "left": "shift",
+    "right": "backspace",
+    "w": 1.5
+  },
   "bottom": [
-    { "type": "symbols", "label": "?123" },
-    { "type": "switch", "label": "🌐", "about": "next keyboard / input method; hidden on iOS when the system shows its own globe key" },
-    { "type": "char", "k": ",", "long": ["!", "?", ";", ":", "-"] },
-    { "type": "space", "label": "TrustChain" },
-    { "type": "char", "k": ".", "long": ["?", "!", "…", "\"", "'"] },
-    { "type": "enter", "label": "⏎" }
+    {
+      "type": "symbols",
+      "label": "?123"
+    },
+    {
+      "type": "switch",
+      "label": "🌐",
+      "about": "next keyboard / input method; hidden on iOS when the system shows its own globe key"
+    },
+    {
+      "type": "char",
+      "k": ",",
+      "long": [
+        "!",
+        "?",
+        ";",
+        ":",
+        "-"
+      ]
+    },
+    {
+      "type": "space",
+      "label": "TrustChain"
+    },
+    {
+      "type": "char",
+      "k": ".",
+      "long": [
+        ",",
+        "?",
+        "!",
+        "…",
+        "\"",
+        "'"
+      ]
+    },
+    {
+      "type": "enter",
+      "label": "⏎"
+    }
   ],
   "symbols": [
-    ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-    ["@", "#", "₮", "%", "&", "-", "+", "(", ")", "/"],
-    ["*", "\"", "'", ":", ";", "!", "?", "_", "№"]
+    [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "0"
+    ],
+    [
+      "@",
+      "#",
+      "₮",
+      "%",
+      "&",
+      "-",
+      "+",
+      "(",
+      ")",
+      "/"
+    ],
+    [
+      "*",
+      "\"",
+      "'",
+      ":",
+      ";",
+      "!",
+      "?",
+      "_",
+      "№"
+    ]
   ],
-  "symbolsLong": { "₮": ["$", "€", "₽", "¥"], "-": ["–", "—"], "\"": ["«", "»", "“", "”"], "?": ["¿"], "!": ["¡"] },
+  "symbolsLong": {
+    "₮": [
+      "$",
+      "€",
+      "₽",
+      "¥"
+    ],
+    "-": [
+      "–",
+      "—"
+    ],
+    "\"": [
+      "«",
+      "»",
+      "“",
+      "”"
+    ],
+    "?": [
+      "¿"
+    ],
+    "!": [
+      "¡"
+    ]
+  },
   "topBar": {
     "brand": "TrustChain",
     "brandUrl": "https://trustchain.mn",
@@ -47,5 +234,6 @@
     "doubleSpacePeriod": true,
     "shift": "tap = next letter capital; double tap = caps lock",
     "noNetwork": "The keyboard never uses the network and never stores what is typed."
-  }
+  },
+  "iphone": true
 }
