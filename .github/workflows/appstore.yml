@@ -12,6 +12,11 @@ on:
         required: false
         type: boolean
         default: false
+      withdraw:
+        description: First cancel the version that is waiting for / in review (this build's version replaces it)
+        required: false
+        type: boolean
+        default: false
       status_only:
         description: Only print the App Store / review status (changes nothing)
         required: false
@@ -148,3 +153,4 @@ jobs:
           SUBMIT: ${{ inputs.submit }}
           SHOTS_DIR: ${{ inputs.keep_screenshots && 'keep' || 'appstore-shots' }}
           STATUS_ONLY: ${{ inputs.status_only }}
+          WITHDRAW: ${{ inputs.withdraw }}

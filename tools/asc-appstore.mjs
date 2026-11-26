@@ -1,5 +1,6 @@
 // Prepare TrustChain Keyboard's iOS App Store listing, screenshots and optional review submission.
-// Env: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, BUILD, SHOTS_DIR, SUBMIT=true|false.
+// Env: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, BUILD, SHOTS_DIR, SUBMIT=true|false,
+//      WITHDRAW=true (cancel the version that is waiting for / in review, so this build's version replaces it).
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -212,6 +213,22 @@ async function main() {
   console.log(`Build ${BUILD}: VALID, app version ${versionString}`);
 
   const editable = new Set(['PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'METADATA_REJECTED', 'REJECTED']);
+  if (process.env.WITHDRAW === 'true') {
+    // Cancel open review submissions; Apple then moves their version to DEVELOPER_REJECTED (editable again).
+    const open = (await all(`/v1/reviewSubmissions?filter[app]=${app.id}&limit=50`))
+      .filter(r => r.attributes.platform === 'IOS' && ['WAITING_FOR_REVIEW', 'IN_REVIEW', 'UNRESOLVED_ISSUES', 'READY_FOR_REVIEW'].includes(r.attributes.state));
+    for (const r of open) {
+      await api('PATCH', `/v1/reviewSubmissions/${r.id}`, request('reviewSubmissions', { canceled: true }, undefined, r.id));
+      console.log(`Review submission ${r.id}: cancel requested (was ${r.attributes.state})`);
+    }
+    for (let i = 0; i < 40 && open.length; i++) {
+      const vs = await all(`/v1/apps/${app.id}/appStoreVersions?filter[platform]=IOS&limit=50`);
+      const busy = vs.filter(v => ['WAITING_FOR_REVIEW', 'IN_REVIEW'].includes(v.attributes.appStoreState));
+      if (!busy.length) { console.log('Withdrawn: no version is waiting for or in review'); break; }
+      console.log(`waiting for withdrawal: ${busy.map(v => `${v.attributes.versionString} ${v.attributes.appStoreState}`).join(', ')}`);
+      await pause(15_000);
+    }
+  }
   const versions = await all(`/v1/apps/${app.id}/appStoreVersions?filter[platform]=IOS&limit=200`);
   const matching = versions.find(item => item.attributes.versionString === versionString);
   if (matching && !editable.has(matching.attributes.appStoreState)) {
