@@ -71,8 +71,9 @@ final class KeyboardView: UIView, UIInputViewAudioFeedback {
         var out: [KeyRect] = []
         for (r, row) in rows.enumerated() {
             let total = row.reduce(0) { $0 + $1.weight }
-            // Short rows keep the key width of a 10-key row and are centred, like a normal keyboard.
-            let unit = min(w / total, w / 10)
+            // Short rows keep the key width of a 10-key row and are centred, like a normal keyboard,
+            // unless the layout asks every row to stretch edge to edge (fillRows).
+            let unit = layout.fillRows ? w / total : min(w / total, w / 10)
             var x = (w - unit * total) / 2
             let top = Self.barH + CGFloat(r) * Self.rowH
             for k in row {

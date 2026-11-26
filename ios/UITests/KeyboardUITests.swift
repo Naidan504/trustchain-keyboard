@@ -179,12 +179,12 @@ final class KeyboardUITests: XCTestCase {
         XCTAssertTrue(keyboard.waitForExistence(timeout: 5), "Could not switch to TrustChain Keyboard")
 
         let frame = keyboard.frame
-        // Mirrors KeyboardView: rows 0 and 1 have 10 keys of w/10; row 2 is shift (1.4) + 7 letters + backspace (1.4) = 9.8, centred.
+        // Mirrors KeyboardView with fillRows: rows 0 and 1 have 10 keys of w/10; row 2 is shift (1.4) + 7 letters + backspace (1.4) = 9.8 units stretched to w.
         func key(_ row: Int, _ index: Int) -> XCUICoordinate {
             let x: CGFloat
             switch row {
             case 0, 1: x = frame.width / 10 * (CGFloat(index) + 0.5)
-            default: x = frame.width / 10 * (0.1 + 1.4 + CGFloat(index) + 0.5)
+            default: x = frame.width / 9.8 * (1.4 + CGFloat(index) + 0.5)
             }
             return keyboard.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: x, dy: 8 + 54 * (CGFloat(row) + 0.5)))
         }

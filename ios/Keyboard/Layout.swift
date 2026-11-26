@@ -15,6 +15,7 @@ struct Layout {
     let letters: [[KeyDef]]
     let symbols: [[KeyDef]]
     let longPressMs: Int
+    let fillRows: Bool
     let brand: String
 
     private struct Spec: Decodable {
@@ -22,6 +23,7 @@ struct Layout {
         struct Bottom: Decodable { let type: String; let k: String?; let label: String?; let long: [String]? }
         struct TopBar: Decodable { let brand: String? }
         let longPressMs: Int?
+        let fillRows: Bool?
         let letters: [[Key]]
         let bottom: [Bottom]
         let symbols: [[String]]
@@ -65,6 +67,7 @@ struct Layout {
             letters: letters + [bottomRow(symbolsMode: false)],
             symbols: symbols + [bottomRow(symbolsMode: true)],
             longPressMs: spec.longPressMs ?? 300,
+            fillRows: spec.fillRows ?? false,
             brand: spec.topBar?.brand ?? "TrustChain"
         )
     }

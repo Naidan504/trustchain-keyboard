@@ -114,7 +114,7 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
             val total = row.sumOf { it.weight.toDouble() }.toFloat()
             // Rows with fewer keys keep the same key width as a 10-key row and are centred,
             // so letters line up like on a normal keyboard.
-            val unit = minOf(w / total, w / 10f)
+            val unit = if (layout.fillRows) w / total else minOf(w / total, w / 10f)
             var x = (w - unit * total) / 2f
             val top = barH + r * rowH
             for (k in row) {
@@ -210,7 +210,7 @@ class KeyboardView(context: Context, private val layout: Layout, private val lis
     private val rowsNow get() = if (symbolsMode) layout.symbols else layout.letters
     private fun rowUnit(row: Int): Float {
         val total = rowsNow[row].sumOf { it.weight.toDouble() }.toFloat()
-        return minOf(width / total, width / 10f)
+        return if (layout.fillRows) width / total else minOf(width / total, width / 10f)
     }
     private fun rowOffset(row: Int): Float {
         val total = rowsNow[row].sumOf { it.weight.toDouble() }.toFloat()

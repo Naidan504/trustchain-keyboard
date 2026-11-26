@@ -3,6 +3,7 @@
   "version": 1,
   "about": "Single source of truth for every platform. Starts from the standard Mongolian (MNS 5217) 12-column layout: the outer column letters move to long-press on their inner neighbour (ф→ц, е→к, ю→п, я→ч, в→ь), except й, which keeps its key and takes ы on long-press. 'long' lists what the long-press popup offers, in popup order; the first entry is preselected.",
   "longPressMs": 300,
+  "fillRows": true,
   "letters": [
     [
       { "k": "ц", "long": ["ф"] }, { "k": "у" }, { "k": "ж" }, { "k": "э" }, { "k": "н" },
